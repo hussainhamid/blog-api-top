@@ -29,4 +29,17 @@ async function getComment(userId) {
   });
 }
 
-module.exports = { creatingUserAndComment, getComment };
+async function createUser(userName, password) {
+  await prisma.user.create({
+    data: {
+      username: userName,
+      password: password,
+    },
+  });
+}
+
+module.exports = {
+  creatingUserAndComment,
+  getComment,
+  createUser,
+};
