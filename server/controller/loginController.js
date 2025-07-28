@@ -1,0 +1,39 @@
+const db = require("../db/query");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+const bcrypt = require("bcryptjs");
+
+async function loginPost(req, res) {
+  console.log(`req.body: ${req.body}`);
+  const { userName, password } = req.body;
+
+  let user = await db.getUser(userName);
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  const match = await bcrypt.compare(password, user.password);
+
+  // if (!match) {
+  //   return res
+  //     .status(401)
+  //     .json({ success: false, message: "incorrect password" });
+  // }
+
+  jwt.sign({ user: user }, process.env.SECRETKEY, (err, token) => {
+    if (err) {
+      return res
+        .sendStatus(500)
+        .json({ success: false, message: "token error" });
+    }
+
+    res.json({
+      token,
+      success: true,
+      user,
+    });
+  });
+}
+
+module.exports = { loginPost };

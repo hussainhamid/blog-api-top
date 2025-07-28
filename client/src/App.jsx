@@ -1,10 +1,17 @@
-import { createContext } from "react";
+import { createContext, useEffect, useState } from "react";
 import "./App.css";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
+import axios from "axios";
 
 import Homepage from "./apps/homepage";
 
-const shopContext = createContext({});
+export const shopContext = createContext({
+  user: "",
+  addUser: () => {},
+  token: "",
+  addToken: () => {},
+  fetchUser: () => {},
+});
 
 function Layout() {
   return (
@@ -23,7 +30,21 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  const [user, setuser] = useState("");
+  const [token, setToken] = useState("");
+  const addUser = (userName) => {
+    setuser(userName);
+  };
+
+  const addToken = (bearerToken) => {
+    setToken(bearerToken);
+  };
+
+  return (
+    <shopContext.Provider value={{ user, token, addToken, addUser }}>
+      <RouterProvider router={router} />
+    </shopContext.Provider>
+  );
 }
 
 export default App;
