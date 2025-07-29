@@ -20,6 +20,8 @@ app.use(express.json());
 
 const { loginRouter } = require("./router/loginRouter");
 const { signupRouter } = require("./router/signupROuter");
+const { logoutRouter } = require("./router/logoutRouter");
+
 const passport = require("passport");
 
 app.get("/", async (req, res) => {
@@ -65,6 +67,7 @@ function verifyToken(req, res, next) {
 
 app.use("/log-in", loginRouter);
 app.use("/sign-up", signupRouter);
+app.use("/log-out", logoutRouter);
 
 app.get("/me", verifyToken, (req, res) => {
   jwt.verify(req.token, process.env.SECRETKEY, (err, authData) => {

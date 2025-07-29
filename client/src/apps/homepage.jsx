@@ -10,7 +10,11 @@ export default function Homepage() {
 
   const [success, setSuccess] = useState(false);
 
-  const { addToken, addUser, user } = useContext(shopContext);
+  const [user, setUser] = useState("");
+
+  const [message, setMessage] = useState("");
+
+  const { addToken, addUser } = useContext(shopContext);
 
   let token = localStorage.getItem("jwtToken");
 
@@ -29,6 +33,7 @@ export default function Homepage() {
           );
 
           if (res.data.success) {
+            setUser(res.data.authData.user.username);
             addUser(res.data.authData.user.username);
             setSuccess(true);
           }
@@ -41,14 +46,14 @@ export default function Homepage() {
     fetchMe();
   }, [addUser, token]);
 
-  async function login(e) {
+  async function signUp(e) {
     e.preventDefault();
 
     try {
       const res = await axios.post(
-        "http://localhost:3000/log-in",
+        "http://localhost:3000/sign-up",
         {
-          userName: data.userName,
+          username: data.userName,
           password: data.password,
         },
         { withCredentials: true }
@@ -58,18 +63,59 @@ export default function Homepage() {
         localStorage.setItem("jwtToken", res.data.token);
         addToken(res.data.token);
         addUser(res.data.user.username);
+        setUser(res.data.user.username);
         setSuccess(true);
+      } else {
+        setMessage(res.data.message);
+      }
+    } catch (err) {
+      console.log("error in sign up function in homepage.jsx", err);
+    }
+  }
+
+  async function login(e) {
+    e.preventDefault();
+
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/log-in",
+        {
+          username: data.userName,
+          password: data.password,
+        },
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        localStorage.setItem("jwtToken", res.data.token);
+        addToken(res.data.token);
+        addUser(res.data.user.username);
+        setUser(res.data.user.username);
+        setSuccess(true);
+      } else {
+        setMessage(res.data.message);
       }
     } catch (err) {
       console.log("error in homepage.jsx login", err);
     }
   }
 
-  const logOut = async (e) => {
-    e.preventDefault();
-    localStorage.removeItem("jwtToken");
-    addToken("");
-    addUser("");
+  const logOut = async () => {
+    try {
+      const res = await axios.get("http://localhost:3000/log-out", {
+        withCredentials: true,
+      });
+
+      if (res.data.loggedOut) {
+        localStorage.removeItem("jwtToken");
+        addToken("");
+        addUser("");
+        setUser("");
+        setSuccess(false);
+      }
+    } catch (err) {
+      console.log("error in logout function in homepage.jsx", err);
+    }
   };
 
   return (
@@ -127,14 +173,21 @@ export default function Homepage() {
                     >
                       log in
                     </button>
-                    <button>Create account</button>
+                    <button
+                      onClick={(e) => {
+                        signUp(e);
+                      }}
+                    >
+                      Create account
+                    </button>
                   </div>
                 </form>
+                <h2>{message}</h2>
               </div>
             </div>
           ) : (
             <div>
-              <h1>hello guest</h1>
+              <h1>hello {user || "guest"}</h1>
               <form>
                 <p>your token: Bearer {localStorage.getItem("jwtToken")}</p>
                 <div>

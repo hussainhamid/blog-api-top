@@ -22,7 +22,7 @@ async function getUser(username) {
 }
 
 async function createUser(userName, password) {
-  await prisma.user.create({
+  return await prisma.user.create({
     data: {
       username: userName,
       password: password,
