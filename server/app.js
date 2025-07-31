@@ -17,10 +17,12 @@ app.use(
 );
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const { loginRouter } = require("./router/loginRouter");
 const { signupRouter } = require("./router/signupROuter");
 const { logoutRouter } = require("./router/logoutRouter");
+const { articleRouter } = require("./router/articleCreationRouter");
 
 const passport = require("passport");
 
@@ -68,6 +70,7 @@ function verifyToken(req, res, next) {
 app.use("/log-in", loginRouter);
 app.use("/sign-up", signupRouter);
 app.use("/log-out", logoutRouter);
+app.use("/article", articleRouter);
 
 app.get("/me", verifyToken, (req, res) => {
   jwt.verify(req.token, process.env.SECRETKEY, (err, authData) => {

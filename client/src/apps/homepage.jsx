@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import { shopContext } from "../App";
+import { useNavigate } from "react-router-dom";
 
 export default function Homepage() {
   const [data, setData] = useState({
@@ -15,6 +16,8 @@ export default function Homepage() {
   const [message, setMessage] = useState("");
 
   const { addToken, addUser } = useContext(shopContext);
+
+  const navigate = useNavigate();
 
   let token = localStorage.getItem("jwtToken");
 
@@ -195,7 +198,11 @@ export default function Homepage() {
                   <input className="comment"></input>
                 </div>
               </form>
+
               <button onClick={logOut}>logOut</button>
+              <button onClick={() => navigate("/article")}>
+                Create article
+              </button>
             </div>
           )}
         </div>

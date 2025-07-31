@@ -21,16 +21,35 @@ model User {
   password String
   status   Role       @default(reader)
   Comments Comments[]
+  articles Articles[]
 }
 
 model Comments {
-  id      Int    @id @default(autoincrement())
-  comment String
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId  String
+  id        Int      @id @default(autoincrement())
+  comment   String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  article   Articles @relation(fields: [articleId], references: [articleSerialId], onDelete: Cascade)
+  articleId String
+}
+
+model Articles {
+  id              Int        @id @default(autoincrement())
+  articleSerialId String     @unique @default(uuid())
+  title           String
+  content         String
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  status          Status     @default(notPublished)
+  comments        Comments[]
 }
 
 enum Role {
   reader
   writer
+}
+
+enum Status {
+  published
+  notPublished
 }
