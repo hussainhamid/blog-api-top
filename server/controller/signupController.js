@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 async function signupPost(req, res) {
-  const { username, password } = req.body;
+  const { username, password, writer } = req.body;
 
   const existingUser = await db.getUser(username);
 
@@ -13,7 +13,7 @@ async function signupPost(req, res) {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const user = await db.createUser(username, hashedPassword);
+  const user = await db.createUser(username, hashedPassword, writer);
 
   jwt.sign({ user: user }, process.env.SECRETKEY, (err, token) => {
     if (err) {

@@ -2,6 +2,8 @@ import { createContext, useState } from "react";
 import "./App.css";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 
+import LogIn from "./apps/login";
+import Signup from "./apps/signup";
 import Homepage from "./apps/homepage";
 import Article from "./apps/articleForm";
 
@@ -10,6 +12,7 @@ export const shopContext = createContext({
   addUser: () => {},
   token: "",
   addToken: () => {},
+  addWriter: () => {},
 });
 
 function Layout() {
@@ -25,7 +28,10 @@ const router = createBrowserRouter([
     path: "/",
     element: <Layout />,
     children: [
-      { path: "/", element: <Homepage /> },
+      { path: "/", element: <LogIn /> },
+      { path: "/sign-up", element: <Signup /> },
+      { path: "/log-in", element: <LogIn /> },
+      { path: "/:username", element: <Homepage /> },
       { path: "/article", element: <Article /> },
     ],
   },
@@ -34,6 +40,7 @@ const router = createBrowserRouter([
 function App() {
   const [user, setUser] = useState("");
   const [token, setToken] = useState("");
+  const [writer, setWriter] = useState(false);
   const addUser = (userName) => {
     setUser(userName);
   };
@@ -42,8 +49,12 @@ function App() {
     setToken(bearerToken);
   };
 
+  const addWriter = (writer) => {
+    setWriter(writer);
+  };
+
   return (
-    <shopContext.Provider value={{ user, token, addToken, addUser }}>
+    <shopContext.Provider value={{ user, token, addToken, addUser, addWriter }}>
       <RouterProvider router={router} />
     </shopContext.Provider>
   );

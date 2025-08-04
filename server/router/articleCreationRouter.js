@@ -2,9 +2,9 @@ const express = require("express");
 
 const articleRouter = express();
 
-const { articleFormGet } = require("../controller/articleCreationController");
+const { articleFormPost } = require("../controller/articleCreationController");
 
-articleRouter.get("/", articleFormGet);
+articleRouter.post("/", articleFormPost);
 
 module.exports = {
   articleRouter,

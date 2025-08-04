@@ -4,16 +4,8 @@ import { shopContext } from "../App";
 import { useNavigate } from "react-router-dom";
 
 export default function Homepage() {
-  const [data, setData] = useState({
-    userName: "",
-    password: "",
-  });
-
-  const [success, setSuccess] = useState(false);
-
   const [user, setUser] = useState("");
-
-  const [message, setMessage] = useState("");
+  const [writer, setWriter] = useState(false);
 
   const { addToken, addUser } = useContext(shopContext);
 
@@ -38,70 +30,23 @@ export default function Homepage() {
           if (res.data.success) {
             setUser(res.data.authData.user.username);
             addUser(res.data.authData.user.username);
-            setSuccess(true);
+          }
+
+          if (res.data.authData.user.status === "reader") {
+            setWriter(false);
+          } else if (res.data.authData.user.status === "writer") {
+            setWriter(true);
           }
         } catch (err) {
           console.log("error in if statement homepage.jsx", err);
         }
+      } else {
+        navigate("/log-in");
       }
     };
 
     fetchMe();
-  }, [addUser, token]);
-
-  async function signUp(e) {
-    e.preventDefault();
-
-    try {
-      const res = await axios.post(
-        "http://localhost:3000/sign-up",
-        {
-          username: data.userName,
-          password: data.password,
-        },
-        { withCredentials: true }
-      );
-
-      if (res.data.success) {
-        localStorage.setItem("jwtToken", res.data.token);
-        addToken(res.data.token);
-        addUser(res.data.user.username);
-        setUser(res.data.user.username);
-        setSuccess(true);
-      } else {
-        setMessage(res.data.message);
-      }
-    } catch (err) {
-      console.log("error in sign up function in homepage.jsx", err);
-    }
-  }
-
-  async function login(e) {
-    e.preventDefault();
-
-    try {
-      const res = await axios.post(
-        "http://localhost:3000/log-in",
-        {
-          username: data.userName,
-          password: data.password,
-        },
-        { withCredentials: true }
-      );
-
-      if (res.data.success) {
-        localStorage.setItem("jwtToken", res.data.token);
-        addToken(res.data.token);
-        addUser(res.data.user.username);
-        setUser(res.data.user.username);
-        setSuccess(true);
-      } else {
-        setMessage(res.data.message);
-      }
-    } catch (err) {
-      console.log("error in homepage.jsx login", err);
-    }
-  }
+  }, [addUser, token, navigate]);
 
   const logOut = async () => {
     try {
@@ -114,7 +59,7 @@ export default function Homepage() {
         addToken("");
         addUser("");
         setUser("");
-        setSuccess(false);
+        navigate("/");
       }
     } catch (err) {
       console.log("error in logout function in homepage.jsx", err);
@@ -124,88 +69,20 @@ export default function Homepage() {
   return (
     <>
       <p>this is the homepage.</p>
+      <p>click below to create or see articles.</p>
 
-      <p>Hello, {user || "guest"}</p>
+      {/* <h2>Hello, {user || "guest"}</h2> */}
 
-      <div className="postDiv">
-        <div className="post">
-          <h3>post title</h3>
-          <p>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Libero,
-            vitae aliquid cum, dolores deserunt est quasi hic earum eum fugit
-            nulla aspernatur provident vero odit, inventore deleniti a illum!
-            Cum.
-          </p>
-        </div>
+      <div>
+        <button onClick={logOut}>logOut</button>
 
-        <div>
-          {!success ? (
-            <div>
-              <div>
-                <p>your token: {token}</p>
-                <form>
-                  <div>
-                    <label htmlFor="username">username</label>
-                    <input
-                      type="text"
-                      className="username"
-                      value={data.userName}
-                      onChange={(e) =>
-                        setData({ ...data, userName: e.target.value })
-                      }
-                    ></input>
-                  </div>
+        {writer && (
+          <button onClick={() => navigate("/article")}>Create article</button>
+        )}
 
-                  <div>
-                    <label htmlFor="password">password</label>
-                    <input
-                      type="password"
-                      className="password"
-                      value={data.password}
-                      onChange={(e) =>
-                        setData({ ...data, password: e.target.value })
-                      }
-                    ></input>
-                  </div>
-
-                  <div>
-                    <button
-                      onClick={(e) => {
-                        login(e);
-                      }}
-                    >
-                      log in
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        signUp(e);
-                      }}
-                    >
-                      Create account
-                    </button>
-                  </div>
-                </form>
-                <h2>{message}</h2>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <h1>hello {user || "guest"}</h1>
-              <form>
-                <p>your token: Bearer {localStorage.getItem("jwtToken")}</p>
-                <div>
-                  <label htmlFor="comment"></label>
-                  <input className="comment"></input>
-                </div>
-              </form>
-
-              <button onClick={logOut}>logOut</button>
-              <button onClick={() => navigate("/article")}>
-                Create article
-              </button>
-            </div>
-          )}
-        </div>
+        <button>See Articles</button>
+        {/* <label htmlFor="writerCheck">become a writer</label>
+        <input type="checkbox" className="writerCheck" /> */}
       </div>
     </>
   );

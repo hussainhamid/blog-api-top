@@ -1,17 +1,13 @@
 const db = require("../db/query");
 
-async function articleFormGet(req, res) {
-  const success = req.body;
+async function articleFormPost(req, res) {
+  const { title, content, username } = req.body;
 
-  if (success) {
-    res.json({ success: true, message: "article form get working" });
-  } else {
-    res.json({ success: false, message: "cannot get article form" });
-  }
+  await db.createArticle(title, content, username);
+
+  res.json({ success: true, message: "article created in db" });
 }
 
-async function articleFormPost(req, res) {}
-
 module.exports = {
-  articleFormGet,
+  articleFormPost,
 };

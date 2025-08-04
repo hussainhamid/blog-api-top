@@ -1,7 +1,8 @@
 import { Editor } from "@tinymce/tinymce-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Form = styled.form`
   display: flex;
@@ -38,73 +39,165 @@ const BtnDiv = styled.div`
   font-size: 1.1rem;
 `;
 
+const LoadingDiv = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  backdrop-filter: blur(10px);
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const LoadingInsideDiv = styled.div`
+  width: 150px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 export default function Article() {
   const editorRef = useRef(null);
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [user, setuser] = useState("");
+  const [message, setMessage] = useState("");
 
-  const handleSubmit = (e) => {
+  const token = localStorage.getItem("jwtToken");
+
+  useEffect(() => {
+    const fetchMe = async () => {
+      if (token) {
+        try {
+          const res = await axios.get(
+            "http://localhost:3000/me",
+            {
+              headers: {
+                Authorization: `bearer ${token}`,
+              },
+            },
+            { withCredentials: true }
+          );
+
+          if (res.data.success) {
+            setuser(res.data.authData.user.username);
+          }
+
+          if (res.data.authData.user.status === "reader") {
+            navigate("/");
+          }
+        } catch (err) {
+          console.log("error in if statement homepage.jsx", err);
+        }
+      } else {
+        navigate("/log-in");
+      }
+    };
+
+    fetchMe();
+  });
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const content = editorRef.current.getContent();
 
-    console.log({ title, content });
+    try {
+      const res = await axios.post("http://localhost:3000/article", {
+        title: title,
+        content: content,
+        username: user,
+      });
+
+      if (res.data.success) {
+        console.log("recieved and stored the data");
+        setMessage(res.data.message);
+      }
+    } catch (err) {
+      console.log("error in handleSubmit", err);
+    }
   };
 
   return (
     <>
-      <Form onSubmit={handleSubmit}>
-        <TitleDiv>
-          <label htmlFor="title">Title:</label>
-          <Title
-            className="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          ></Title>
-        </TitleDiv>
+      <div>
+        <Form>
+          <TitleDiv>
+            <label htmlFor="title">Title:</label>
+            <Title
+              className="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            ></Title>
+          </TitleDiv>
 
-        <Editor
-          apiKey={import.meta.env.VITE_TINYMCEAPIKEY}
-          onInit={(evt, editor) => (editorRef.current = editor)}
-          initialValue="<p>Start writing...</p>"
-          init={{
-            height: 250,
-            menubar: true,
-            plugins: [
-              "advlist",
-              "autolink",
-              "lists",
-              "link",
-              "image",
-              "charmap",
-              "preview",
-              "anchor",
-              "searchreplace",
-              "visualblocks",
-              "code",
-              "fullscreen",
-              "insertdatetime",
-              "media",
-              "table",
-              "code",
-              "help",
-              "wordcount",
-            ],
-            toolbar:
-              "undo redo | blocks | bold italic | alignleft aligncenter alignright | code",
-            block_formats:
-              "Paragraph=p; Heading 1=h1; Heading 2=h2; Code=pre; Quote=blockquote",
-            content_style:
-              "body { background-color: #242424; color: rgba(255, 255, 255, 0.87); }",
-          }}
-        />
+          <Editor
+            apiKey={import.meta.env.VITE_TINYMCEAPIKEY}
+            onInit={(evt, editor) => {
+              editorRef.current = editor;
+              setLoading(false);
+            }}
+            initialValue="<p>Start writing...</p>"
+            init={{
+              height: 250,
+              menubar: true,
+              plugins: [
+                "advlist",
+                "autolink",
+                "lists",
+                "link",
+                "image",
+                "charmap",
+                "preview",
+                "anchor",
+                "searchreplace",
+                "visualblocks",
+                "code",
+                "fullscreen",
+                "insertdatetime",
+                "media",
+                "table",
+                "code",
+                "help",
+                "wordcount",
+              ],
+              toolbar:
+                "undo redo | blocks | bold italic | alignleft aligncenter alignright | code",
+              block_formats:
+                "Paragraph=p; Heading 1=h1; Heading 2=h2; Code=pre; Quote=blockquote",
+              content_style:
+                "body { background-color: #242424; color: rgba(255, 255, 255, 0.87); }",
+            }}
+          />
 
-        <BtnDiv>
-          <button>Publish</button>
-          <button onClick={() => navigate("/")}>Go back</button>
-        </BtnDiv>
-      </Form>
+          <BtnDiv>
+            <button
+              onClick={(e) => {
+                handleSubmit(e);
+              }}
+            >
+              Publish
+            </button>
+            <button onClick={() => navigate("/")}>Go back</button>
+          </BtnDiv>
+        </Form>
+
+        <h2>{message}</h2>
+      </div>
+
+      {loading && (
+        <LoadingDiv>
+          <LoadingInsideDiv>
+            <p>loading...</p>
+          </LoadingInsideDiv>
+        </LoadingDiv>
+      )}
     </>
   );
 }

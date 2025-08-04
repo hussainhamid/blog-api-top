@@ -21,11 +21,44 @@ async function getUser(username) {
   });
 }
 
-async function createUser(userName, password) {
+async function createUser(userName, password, writer) {
   return await prisma.user.create({
     data: {
       username: userName,
       password: password,
+      status: writer ? "writer" : "reader",
+    },
+  });
+}
+
+async function updateUser(username, writer) {
+  return await prisma.user.update({
+    data: {
+      status: writer ? "writer" : "reader",
+    },
+    where: {
+      username: username,
+    },
+  });
+}
+
+async function createArticle(title, content, username) {
+  const user = await prisma.user.findFirst({
+    where: {
+      username: username,
+    },
+    include: {
+      articles: true,
+    },
+  });
+
+  if (!user) throw new Error("user not found");
+
+  await prisma.articles.create({
+    data: {
+      title: title,
+      content: content,
+      userId: user.id,
     },
   });
 }
@@ -34,4 +67,6 @@ module.exports = {
   getComment,
   getUser,
   createUser,
+  updateUser,
+  createArticle,
 };
