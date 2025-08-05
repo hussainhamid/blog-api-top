@@ -18,7 +18,7 @@ async function loginPost(req, res) {
     return res.json({ success: false, message: "incorrect password" });
   }
 
-  jwt.sign({ user: user }, process.env.SECRETKEY, (err, token) => {
+  jwt.sign({ user: { id: user.id } }, process.env.SECRETKEY, (err, token) => {
     if (err) {
       return res.json({ success: false, message: "token error" });
     }
@@ -50,7 +50,7 @@ async function loginPut(req, res) {
     user = await db.updateUser(username, writer);
   }
 
-  jwt.sign({ user: user }, process.env.SECRETKEY, (err, token) => {
+  jwt.sign({ user: { id: user.id } }, process.env.SECRETKEY, (err, token) => {
     if (err) {
       return res.json({ success: false, message: "token error" });
     }

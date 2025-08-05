@@ -33,13 +33,13 @@ export default function Signup() {
           );
 
           if (res.data.success) {
-            addUser(res.data.authData.user.username);
-            navigate(`/${res.data.authData.user.username}`);
+            addUser(res.data.user.username);
+            navigate(`/${res.data.user.username}`);
           }
 
-          if (res.data.authData.user.status === "reader") {
+          if (res.data.user.status === "reader") {
             addWriter(false);
-          } else if (res.data.authData.user.status === "writer") {
+          } else if (res.data.user.status === "writer") {
             addWriter(true);
           }
         } catch (err) {

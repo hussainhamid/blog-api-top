@@ -15,7 +15,7 @@ async function signupPost(req, res) {
 
   const user = await db.createUser(username, hashedPassword, writer);
 
-  jwt.sign({ user: user }, process.env.SECRETKEY, (err, token) => {
+  jwt.sign({ user: { id: user.id } }, process.env.SECRETKEY, (err, token) => {
     if (err) {
       return res.status(500).json({ success: false, message: "token problem" });
     }

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 export default function Homepage() {
   const [user, setUser] = useState("");
   const [writer, setWriter] = useState(false);
+  const [message, setMessage] = useState("");
 
   const { addToken, addUser } = useContext(shopContext);
 
@@ -28,13 +29,15 @@ export default function Homepage() {
           );
 
           if (res.data.success) {
-            setUser(res.data.authData.user.username);
-            addUser(res.data.authData.user.username);
+            setUser(res.data.user.username);
+            addUser(res.data.user.username);
+          } else {
+            navigate("/log-in");
           }
 
-          if (res.data.authData.user.status === "reader") {
+          if (res.data.user.status === "reader") {
             setWriter(false);
-          } else if (res.data.authData.user.status === "writer") {
+          } else if (res.data.user.status === "writer") {
             setWriter(true);
           }
         } catch (err) {
@@ -66,12 +69,31 @@ export default function Homepage() {
     }
   };
 
+  const becomeWriter = async () => {
+    try {
+      const res = await axios.put(
+        "http://localhost:3000/become-writer",
+        { username: user },
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        setWriter(true);
+        setMessage(res.data.message);
+        navigate("/");
+      }
+    } catch (err) {
+      console.log("error in becomeWriter in homepage", err);
+    }
+  };
+
   return (
     <>
       <p>this is the homepage.</p>
+      <p>{message}</p>
       <p>click below to create or see articles.</p>
 
-      {/* <h2>Hello, {user || "guest"}</h2> */}
+      <h2>Hello, {user || "guest"}</h2>
 
       <div>
         <button onClick={logOut}>logOut</button>
@@ -81,8 +103,10 @@ export default function Homepage() {
         )}
 
         <button>See Articles</button>
-        {/* <label htmlFor="writerCheck">become a writer</label>
-        <input type="checkbox" className="writerCheck" /> */}
+
+        {!writer && (
+          <button onClick={() => becomeWriter()}>Become Writer</button>
+        )}
       </div>
     </>
   );

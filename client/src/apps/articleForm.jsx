@@ -86,10 +86,10 @@ export default function Article() {
           );
 
           if (res.data.success) {
-            setuser(res.data.authData.user.username);
+            setuser(res.data.user.username);
           }
 
-          if (res.data.authData.user.status === "reader") {
+          if (res.data.user.status === "reader") {
             navigate("/");
           }
         } catch (err) {

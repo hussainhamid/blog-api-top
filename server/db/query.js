@@ -63,10 +63,22 @@ async function createArticle(title, content, username) {
   });
 }
 
+async function becomeWriter(username) {
+  await prisma.user.update({
+    data: {
+      status: "writer",
+    },
+    where: {
+      username: username,
+    },
+  });
+}
+
 module.exports = {
   getComment,
   getUser,
   createUser,
   updateUser,
   createArticle,
+  becomeWriter,
 };
