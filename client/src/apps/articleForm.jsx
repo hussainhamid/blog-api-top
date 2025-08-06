@@ -60,7 +60,7 @@ const LoadingInsideDiv = styled.div`
   justify-content: center;
 `;
 
-export default function Article() {
+export default function CreateArticle() {
   const editorRef = useRef(null);
   const navigate = useNavigate();
 

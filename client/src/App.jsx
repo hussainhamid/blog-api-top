@@ -5,7 +5,8 @@ import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import LogIn from "./apps/login";
 import Signup from "./apps/signup";
 import Homepage from "./apps/homepage";
-import Article from "./apps/articleForm";
+import CreateArticle from "./apps/articleForm";
+import SeeArticle from "./apps/seeArticles";
 
 export const shopContext = createContext({
   user: "",
@@ -32,7 +33,8 @@ const router = createBrowserRouter([
       { path: "/sign-up", element: <Signup /> },
       { path: "/log-in", element: <LogIn /> },
       { path: "/:username", element: <Homepage /> },
-      { path: "/article", element: <Article /> },
+      { path: "/article", element: <CreateArticle /> },
+      { path: "/see-article", element: <SeeArticle /> },
     ],
   },
 ]);

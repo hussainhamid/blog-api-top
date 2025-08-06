@@ -74,6 +74,18 @@ async function becomeWriter(username) {
   });
 }
 
+async function getAllArticles() {
+  return await prisma.articles.findMany({
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    },
+  });
+}
+
 module.exports = {
   getComment,
   getUser,
@@ -81,4 +93,5 @@ module.exports = {
   updateUser,
   createArticle,
   becomeWriter,
+  getAllArticles,
 };

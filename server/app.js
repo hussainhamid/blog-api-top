@@ -24,6 +24,7 @@ const { signupRouter } = require("./router/signupROuter");
 const { logoutRouter } = require("./router/logoutRouter");
 const { articleRouter } = require("./router/articleCreationRouter");
 const { becomeWriterRouter } = require("./router/becomeWriterRouter");
+const { getArticlesRouter } = require("./router/getArticlesRouter");
 
 const passport = require("passport");
 
@@ -73,6 +74,7 @@ app.use("/sign-up", signupRouter);
 app.use("/log-out", logoutRouter);
 app.use("/article", articleRouter);
 app.use("/become-writer", becomeWriterRouter);
+app.use("/get-articles", getArticlesRouter);
 
 app.get("/me", verifyToken, async (req, res) => {
   jwt.verify(req.token, process.env.SECRETKEY, async (err, authData) => {

@@ -2,11 +2,13 @@ import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import { shopContext } from "../App";
 import { useNavigate } from "react-router-dom";
+import DOMPurify from "dompurify";
 
 export default function Homepage() {
   const [user, setUser] = useState("");
   const [writer, setWriter] = useState(false);
   const [message, setMessage] = useState("");
+  const [articles, setArticles] = useState([]);
 
   const { addToken, addUser } = useContext(shopContext);
 
@@ -48,7 +50,27 @@ export default function Homepage() {
       }
     };
 
+    const fetchArticles = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/get-articles", {
+          withCredentials: true,
+        });
+
+        if (res.data.success) {
+          const sanitizedArticles = res.data.allArticles.map((article) => ({
+            ...article,
+            content: DOMPurify.sanitize(article.content),
+          }));
+
+          setArticles(sanitizedArticles);
+        }
+      } catch (err) {
+        console.error("error in fetchAticles in homepage.jsx", err);
+      }
+    };
+
     fetchMe();
+    fetchArticles();
   }, [addUser, token, navigate]);
 
   const logOut = async () => {
@@ -93,6 +115,17 @@ export default function Homepage() {
       <p>{message}</p>
       <p>click below to create or see articles.</p>
 
+      <div>
+        {articles.map((article, index) => (
+          <div key={index}>
+            <p>user: {article.user.username}</p>
+            <p>title: {article.title}</p>
+            <div dangerouslySetInnerHTML={{ __html: article.content }} />
+            <button>see Article</button>
+          </div>
+        ))}
+      </div>
+
       <h2>Hello, {user || "guest"}</h2>
 
       <div>
@@ -101,8 +134,6 @@ export default function Homepage() {
         {writer && (
           <button onClick={() => navigate("/article")}>Create article</button>
         )}
-
-        <button>See Articles</button>
 
         {!writer && (
           <button onClick={() => becomeWriter()}>Become Writer</button>
