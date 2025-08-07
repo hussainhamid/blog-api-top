@@ -27,6 +27,7 @@ model User {
 model Comments {
   id        Int      @id @default(autoincrement())
   comment   String
+  createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   article   Articles @relation(fields: [articleId], references: [articleSerialId], onDelete: Cascade)
@@ -38,6 +39,7 @@ model Articles {
   articleSerialId String     @unique @default(uuid())
   title           String
   content         String
+  createdAt       DateTime   @default(now())
   user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId          String
   status          Status     @default(notPublished)

@@ -76,6 +76,62 @@ async function becomeWriter(username) {
 
 async function getAllArticles() {
   return await prisma.articles.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    },
+  });
+}
+
+async function getOneArticle(articleSerialId) {
+  return await prisma.articles.findUnique({
+    where: {
+      articleSerialId,
+    },
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+      comments: {
+        include: {
+          user: {
+            select: {
+              username: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
+    },
+  });
+}
+
+async function createComment(articleSerialId, userId, comment) {
+  const article = await prisma.articles.findUnique({
+    where: {
+      articleSerialId,
+    },
+  });
+
+  if (!article) throw new Error("article not found while creating a comment");
+
+  await prisma.comments.create({
+    data: {
+      comment: comment,
+      userId: userId,
+      articleId: articleSerialId,
+    },
+
     include: {
       user: {
         select: {
@@ -94,4 +150,6 @@ module.exports = {
   createArticle,
   becomeWriter,
   getAllArticles,
+  getOneArticle,
+  createComment,
 };

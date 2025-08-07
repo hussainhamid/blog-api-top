@@ -143,7 +143,6 @@ export default function CreateArticle() {
               editorRef.current = editor;
               setLoading(false);
             }}
-            initialValue="<p>Start writing...</p>"
             init={{
               height: 250,
               menubar: true,

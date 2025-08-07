@@ -111,23 +111,6 @@ export default function Homepage() {
 
   return (
     <>
-      <p>this is the homepage.</p>
-      <p>{message}</p>
-      <p>click below to create or see articles.</p>
-
-      <div>
-        {articles.map((article, index) => (
-          <div key={index}>
-            <p>user: {article.user.username}</p>
-            <p>title: {article.title}</p>
-            <div dangerouslySetInnerHTML={{ __html: article.content }} />
-            <button>see Article</button>
-          </div>
-        ))}
-      </div>
-
-      <h2>Hello, {user || "guest"}</h2>
-
       <div>
         <button onClick={logOut}>logOut</button>
 
@@ -138,6 +121,25 @@ export default function Homepage() {
         {!writer && (
           <button onClick={() => becomeWriter()}>Become Writer</button>
         )}
+      </div>
+
+      <p>{message}</p>
+
+      <div>
+        {articles.map((article, index) => (
+          <div key={index}>
+            <p>user: {article.user.username}</p>
+            <p>title: {article.title}</p>
+            <div dangerouslySetInnerHTML={{ __html: article.content }} />
+            <button
+              onClick={() =>
+                navigate(`/see-article/${article.articleSerialId}`)
+              }
+            >
+              see Article
+            </button>
+          </div>
+        ))}
       </div>
     </>
   );
