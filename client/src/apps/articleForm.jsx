@@ -124,6 +124,30 @@ export default function CreateArticle() {
     }
   };
 
+  const handleSave = async (e) => {
+    e.preventDefault();
+
+    const content = editorRef.current.getContent();
+
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/save-article",
+        {
+          title: title,
+          content: content,
+          username: user,
+        },
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        setMessage(res.data.message);
+      }
+    } catch (err) {
+      console.error("error in handleSave func in articleForm.jsx", err);
+    }
+  };
+
   return (
     <>
       <div>
@@ -183,6 +207,15 @@ export default function CreateArticle() {
             >
               Publish
             </button>
+
+            <button
+              onClick={(e) => {
+                handleSave(e);
+              }}
+            >
+              Save
+            </button>
+
             <button onClick={() => navigate("/")}>Go back</button>
           </BtnDiv>
         </Form>

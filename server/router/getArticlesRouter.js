@@ -1,5 +1,5 @@
 const {
-  getAllArticlesController,
+  getAllPublishedArticlesController,
   getOneArticle,
 } = require("../controller/getArticlesController");
 
@@ -7,7 +7,7 @@ const express = require("express");
 const getArticlesRouter = express();
 const getOneArticleRouter = express();
 
-getArticlesRouter.get("/", getAllArticlesController);
+getArticlesRouter.get("/", getAllPublishedArticlesController);
 getOneArticleRouter.post("/:articleSerialId", getOneArticle);
 
 module.exports = {

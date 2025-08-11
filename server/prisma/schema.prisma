@@ -42,7 +42,7 @@ model Articles {
   createdAt       DateTime   @default(now())
   user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId          String
-  status          Status     @default(notPublished)
+  status          Status     @default(published)
   comments        Comments[]
 }
 

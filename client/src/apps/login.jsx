@@ -12,11 +12,9 @@ export default function LogIn() {
   const [message, setMessage] = useState("");
   const [writer, setWriter] = useState(false);
 
-  const { addToken, addUser, addWriter } = useContext(shopContext);
+  const { addToken, addUser, addWriter, token } = useContext(shopContext);
 
   const navigate = useNavigate();
-
-  let token = localStorage.getItem("jwtToken");
 
   useEffect(() => {
     const fetchMe = async () => {

@@ -63,6 +63,28 @@ async function createArticle(title, content, username) {
   });
 }
 
+async function saveArticle(title, content, username) {
+  const user = await prisma.user.findFirst({
+    where: {
+      username,
+    },
+    include: {
+      articles: true,
+    },
+  });
+
+  if (!user) throw new Error("user not found while saving article");
+
+  await prisma.articles.create({
+    data: {
+      title,
+      content,
+      userId: user.id,
+      status: "notPublished",
+    },
+  });
+}
+
 async function becomeWriter(username) {
   await prisma.user.update({
     data: {
@@ -74,8 +96,11 @@ async function becomeWriter(username) {
   });
 }
 
-async function getAllArticles() {
+async function getAllPublishedArticles() {
   return await prisma.articles.findMany({
+    where: {
+      status: "published",
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -142,14 +167,36 @@ async function createComment(articleSerialId, userId, comment) {
   });
 }
 
+async function getUserInfo(username) {
+  return await prisma.user.findFirst({
+    where: {
+      username,
+    },
+
+    include: {
+      articles: true,
+      Comments: true,
+
+      _count: {
+        select: {
+          articles: true,
+          Comments: true,
+        },
+      },
+    },
+  });
+}
+
 module.exports = {
   getComment,
   getUser,
   createUser,
   updateUser,
   createArticle,
+  saveArticle,
   becomeWriter,
-  getAllArticles,
+  getAllPublishedArticles,
   getOneArticle,
   createComment,
+  getUserInfo,
 };

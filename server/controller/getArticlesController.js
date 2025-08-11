@@ -1,7 +1,7 @@
 const db = require("../db/query");
 
-async function getAllArticlesController(req, res) {
-  const allArticles = await db.getAllArticles();
+async function getAllPublishedArticlesController(req, res) {
+  const allArticles = await db.getAllPublishedArticles();
 
   return res.json({
     success: true,
@@ -23,6 +23,6 @@ async function getOneArticle(req, res) {
 }
 
 module.exports = {
-  getAllArticlesController,
+  getAllPublishedArticlesController,
   getOneArticle,
 };

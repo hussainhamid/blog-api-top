@@ -7,6 +7,7 @@ import Signup from "./apps/signup";
 import Homepage from "./apps/homepage";
 import CreateArticle from "./apps/articleForm";
 import SeeArticle from "./apps/seeArticles";
+import Profile from "./apps/profile";
 
 export const shopContext = createContext({
   user: "",
@@ -35,13 +36,16 @@ const router = createBrowserRouter([
       { path: "/:username", element: <Homepage /> },
       { path: "/article", element: <CreateArticle /> },
       { path: "/see-article/:articleSerialId", element: <SeeArticle /> },
+      { path: "/profile/:user", element: <Profile /> },
     ],
   },
 ]);
 
 function App() {
   const [user, setUser] = useState("");
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState(
+    () => localStorage.getItem("jwtToken") || ""
+  );
   const [writer, setWriter] = useState(false);
   const addUser = (userName) => {
     setUser(userName);
@@ -56,7 +60,9 @@ function App() {
   };
 
   return (
-    <shopContext.Provider value={{ user, token, addToken, addUser, addWriter }}>
+    <shopContext.Provider
+      value={{ user, token, addToken, addUser, addWriter, writer }}
+    >
       <RouterProvider router={router} />
     </shopContext.Provider>
   );

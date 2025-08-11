@@ -5,16 +5,13 @@ import { useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
 
 export default function Homepage() {
-  const [user, setUser] = useState("");
   const [writer, setWriter] = useState(false);
   const [message, setMessage] = useState("");
   const [articles, setArticles] = useState([]);
 
-  const { addToken, addUser } = useContext(shopContext);
+  const { addToken, addUser, token, user } = useContext(shopContext);
 
   const navigate = useNavigate();
-
-  let token = localStorage.getItem("jwtToken");
 
   useEffect(() => {
     const fetchMe = async () => {
@@ -31,7 +28,6 @@ export default function Homepage() {
           );
 
           if (res.data.success) {
-            setUser(res.data.user.username);
             addUser(res.data.user.username);
           } else {
             navigate("/log-in");
@@ -45,8 +41,6 @@ export default function Homepage() {
         } catch (err) {
           console.log("error in if statement homepage.jsx", err);
         }
-      } else {
-        navigate("/log-in");
       }
     };
 
@@ -83,7 +77,6 @@ export default function Homepage() {
         localStorage.removeItem("jwtToken");
         addToken("");
         addUser("");
-        setUser("");
         navigate("/");
       }
     } catch (err) {
@@ -112,11 +105,13 @@ export default function Homepage() {
   return (
     <>
       <div>
-        <button onClick={logOut}>logOut</button>
-
+        <p>user: {user}</p>
         {writer && (
           <button onClick={() => navigate("/article")}>Create article</button>
         )}
+
+        <button onClick={() => navigate(`/profile/${user}`)}>Profile</button>
+        <button onClick={() => logOut()}>logOut</button>
 
         {!writer && (
           <button onClick={() => becomeWriter()}>Become Writer</button>
