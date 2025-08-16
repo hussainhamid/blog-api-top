@@ -114,6 +114,14 @@ async function getAllPublishedArticles() {
   });
 }
 
+async function getAllUnPublishedArticles() {
+  return await prisma.articles.findMany({
+    where:{
+      status: "notPublished"
+    }
+  })
+}
+
 async function getOneArticle(articleSerialId) {
   return await prisma.articles.findUnique({
     where: {
