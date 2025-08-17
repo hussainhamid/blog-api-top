@@ -1,6 +1,7 @@
 import axios from "axios";
-import { act, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DOMPurify from "dompurify";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -69,14 +70,43 @@ export default function Profile() {
       }
     };
 
+    if (activeTab === "articles") {
+      getArticlesInfo();
+    }
+
     fetchMe();
     fetchUserProfile();
-  }, [navigate, token, user]);
+  }, [navigate, token, user, activeTab]);
 
-  const getArticlesInfo = async (e) => {
-    e.preventDefault();
-    setActiveTab("articles");
+  const getArticlesInfo = async () => {
     localStorage.setItem("activeTab", "articles");
+
+    try {
+      const res = await axios.get("http://localhost:3000/see-profile-article", {
+        withCredentials: true,
+      });
+
+      if (res.data.success) {
+        const publishedSanitizedArticles = res.data.publishedArticles.map(
+          (article) => ({
+            ...article,
+            content: DOMPurify.sanitize(article.content),
+          })
+        );
+
+        const unPublishedSanitizedArticles = res.data.unpublishedArticles.map(
+          (article) => ({
+            ...article,
+            content: DOMPurify.sanitize(article.content),
+          })
+        );
+
+        setPublishedArticles(publishedSanitizedArticles);
+        setNotPublishedArticles(unPublishedSanitizedArticles);
+      }
+    } catch (err) {
+      console.error("error in getArticleInfo in profile.jsx", err);
+    }
   };
 
   return (
@@ -90,7 +120,14 @@ export default function Profile() {
         >
           info
         </button>
-        <button onClick={(e) => getArticlesInfo(e)}>articles</button>
+        <button
+          onClick={() => {
+            setActiveTab("articles");
+            localStorage.setItem("activeTab", "articles");
+          }}
+        >
+          articles
+        </button>
         <button onClick={() => setActiveTab("comments")}>comments</button>
       </nav>
 
@@ -106,7 +143,24 @@ export default function Profile() {
 
       {activeTab === "articles" && (
         <div className="articles-div">
-          <h1>article Section</h1>
+          <div className="published-div">
+            <h2>published articles</h2>
+
+            {publishedArticles.map((article, index) => (
+              <div key={index}>
+                <p>user: {article.user.username}</p>
+                <p>title: {article.title}</p>
+                <div dangerouslySetInnerHTML={{ __html: article.content }} />
+                <button
+                  onClick={() =>
+                    navigate(`/see-article/${article.articleSerialId}`)
+                  }
+                >
+                  see Article
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </>

@@ -118,6 +118,16 @@ async function getAllUnPublishedArticles() {
   return await prisma.articles.findMany({
     where:{
       status: "notPublished"
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      user: {
+        select: {
+          username: true
+        }
+      }
     }
   })
 }
@@ -207,4 +217,5 @@ module.exports = {
   getOneArticle,
   createComment,
   getUserInfo,
+  getAllUnPublishedArticles
 };

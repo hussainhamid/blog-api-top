@@ -29,6 +29,9 @@ const { getOneArticleRouter } = require("./router/getArticlesRouter");
 const { createCommentRouter } = require("./router/createCommentRouter");
 const { seeProfileRouter } = require("./router/seeProfileRouter");
 const { articleSaveRouter } = require("./router/articleCreationRouter");
+const {
+  seeProfileArticleRouter,
+} = require("./router/seeProfileArticlesRouter");
 
 const passport = require("passport");
 
@@ -83,6 +86,7 @@ app.use("/see-article", getOneArticleRouter);
 app.use("/create-comment", createCommentRouter);
 app.use("/profile", seeProfileRouter);
 app.use("/save-article", articleSaveRouter);
+app.use("/see-profile-article", seeProfileArticleRouter);
 
 app.get("/me", verifyToken, async (req, res) => {
   jwt.verify(req.token, process.env.SECRETKEY, async (err, authData) => {
