@@ -2,9 +2,11 @@ const express = require("express");
 
 const deleteArticleRouter = express();
 
-const { deleteArticle } = require("../controller/manageArticleController");
+const {
+  deleteArticleController,
+} = require("../controller/manageArticleController");
 
-deleteArticleRouter.delete("/", deleteArticle);
+deleteArticleRouter.delete("/:articleSerialId", deleteArticleController);
 
 module.exports = {
   deleteArticleRouter,

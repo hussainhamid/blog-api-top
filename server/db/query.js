@@ -206,9 +206,53 @@ async function getUserInfo(username) {
 }
 
 async function deleteArticle(articleSerialId) {
+  const article = await prisma.articles.findUnique({
+    where: {
+      articleSerialId,
+    },
+  });
+
+  if (!article) throw new Error("article not found");
+
   await prisma.articles.delete({
     where: {
-      articleSerialId: articleSerialId,
+      articleSerialId,
+    },
+  });
+}
+
+async function publishArticle(articleSerialId) {
+  const article = await prisma.articles.findUnique({
+    where: {
+      articleSerialId,
+    },
+  });
+
+  if (!article) throw new Error("article not found");
+
+  await prisma.articles.update({
+    where: { articleSerialId },
+    data: {
+      status: "published",
+    },
+  });
+}
+
+async function unPublishArticle(articleSerialId) {
+  const article = await prisma.articles.findUnique({
+    where: {
+      articleSerialId,
+    },
+  });
+
+  if (!article) throw new Error("article not found");
+
+  await prisma.articles.update({
+    where: {
+      articleSerialId,
+    },
+    data: {
+      status: "notPublished",
     },
   });
 }
@@ -227,4 +271,6 @@ module.exports = {
   getUserInfo,
   getAllUnPublishedArticles,
   deleteArticle,
+  publishArticle,
+  unPublishArticle,
 };

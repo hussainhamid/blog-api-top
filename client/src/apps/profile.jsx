@@ -118,18 +118,69 @@ export default function Profile() {
 
     try {
       const res = await axios.delete(
-        "http://localhost:3000/delete-article",
+        `http://localhost:3000/delete-article/${articleSerialId}`,
         {
           withCredentials: true,
-        },
-        { articleSerialId }
+        }
       );
 
       if (res.data.success) {
         setMessage(res.data.message);
+
+        setPublishedArticles((prev) =>
+          prev.filter((article) => article.articleSerialId !== articleSerialId)
+        );
+
+        setNotPublishedArticles((prev) =>
+          prev.filter((article) => article.articleSerialId !== articleSerialId)
+        );
       }
     } catch (err) {
       console.error("error in deleteArticle in profile.jsx", err);
+    }
+  };
+
+  const publishArticle = async (e, articleSerialId) => {
+    e.preventDefault();
+
+    try {
+      const res = await axios.put(
+        `http://localhost:3000/publish-article/${articleSerialId}`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (res.data.success) {
+        setMessage(res.data.message);
+
+        setNotPublishedArticles((prev) =>
+          prev.filter((article) => article.articleSerialId !== articleSerialId)
+        );
+      }
+    } catch (err) {
+      console.error("error in publishArticle in Profile.jsx", err);
+    }
+  };
+
+  const unPublishArticle = async (e, articleSerialId) => {
+    e.preventDefault();
+
+    try {
+      const res = await axios.put(
+        `http://localhost:3000/unPublish-article/${articleSerialId}`,
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        setMessage(res.data.message);
+
+        setPublishedArticles((prev) =>
+          prev.filter((article) => article.articleSerialId !== articleSerialId)
+        );
+      }
+    } catch (err) {
+      console.error("error in unPublishArticle in profile.jsx", err);
     }
   };
 
@@ -167,6 +218,8 @@ export default function Profile() {
 
       {activeTab === "articles" && (
         <div className="articles-div">
+          <h3>{message}</h3>
+
           <div className="dropdown">
             <label htmlFor="articles-dropdown">you are seeing:</label>
             <select
@@ -194,7 +247,13 @@ export default function Profile() {
                   >
                     see Article
                   </button>
-                  <button>unpublish</button>
+                  <button
+                    onClick={(e) =>
+                      unPublishArticle(e, article.articleSerialId)
+                    }
+                  >
+                    unpublish
+                  </button>
                   <button
                     onClick={(e) => deleteArticle(e, article.articleSerialId)}
                   >
@@ -207,7 +266,7 @@ export default function Profile() {
 
           {articlesValue === "not-published" && (
             <div className="not-published-div">
-              <h2>not published articles</h2>
+              <h2>un published articles</h2>
 
               {notPublishedArticles.map((article, index) => (
                 <div key={index}>
@@ -222,7 +281,11 @@ export default function Profile() {
                     see Article
                   </button>
 
-                  <button>publish</button>
+                  <button
+                    onClick={(e) => publishArticle(e, article.articleSerialId)}
+                  >
+                    publish
+                  </button>
                   <button
                     onClick={(e) => deleteArticle(e, article.articleSerialId)}
                   >
@@ -232,7 +295,6 @@ export default function Profile() {
               ))}
             </div>
           )}
-          <h3>{message}</h3>
         </div>
       )}
     </>
