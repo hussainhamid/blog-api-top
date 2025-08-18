@@ -116,8 +116,8 @@ async function getAllPublishedArticles() {
 
 async function getAllUnPublishedArticles() {
   return await prisma.articles.findMany({
-    where:{
-      status: "notPublished"
+    where: {
+      status: "notPublished",
     },
     orderBy: {
       createdAt: "desc",
@@ -125,11 +125,11 @@ async function getAllUnPublishedArticles() {
     include: {
       user: {
         select: {
-          username: true
-        }
-      }
-    }
-  })
+          username: true,
+        },
+      },
+    },
+  });
 }
 
 async function getOneArticle(articleSerialId) {
@@ -205,6 +205,14 @@ async function getUserInfo(username) {
   });
 }
 
+async function deleteArticle(articleSerialId) {
+  await prisma.articles.delete({
+    where: {
+      articleSerialId: articleSerialId,
+    },
+  });
+}
+
 module.exports = {
   getComment,
   getUser,
@@ -217,5 +225,6 @@ module.exports = {
   getOneArticle,
   createComment,
   getUserInfo,
-  getAllUnPublishedArticles
+  getAllUnPublishedArticles,
+  deleteArticle,
 };

@@ -11,9 +11,13 @@ export default function Profile() {
   const [publishedArticles, setPublishedArticles] = useState([]);
   const [notPublishedArticles, setNotPublishedArticles] = useState([]);
 
+  const [articlesValue, setArticlesValue] = useState("published");
+
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem("activeTab") || "info";
   });
+
+  const [message, setMessage] = useState("");
 
   const [userInformation, setUserInfo] = useState({
     username: "",
@@ -109,6 +113,26 @@ export default function Profile() {
     }
   };
 
+  const deleteArticle = async (e, articleSerialId) => {
+    e.preventDefault();
+
+    try {
+      const res = await axios.delete(
+        "http://localhost:3000/delete-article",
+        {
+          withCredentials: true,
+        },
+        { articleSerialId }
+      );
+
+      if (res.data.success) {
+        setMessage(res.data.message);
+      }
+    } catch (err) {
+      console.error("error in deleteArticle in profile.jsx", err);
+    }
+  };
+
   return (
     <>
       <nav>
@@ -143,24 +167,72 @@ export default function Profile() {
 
       {activeTab === "articles" && (
         <div className="articles-div">
-          <div className="published-div">
-            <h2>published articles</h2>
-
-            {publishedArticles.map((article, index) => (
-              <div key={index}>
-                <p>user: {article.user.username}</p>
-                <p>title: {article.title}</p>
-                <div dangerouslySetInnerHTML={{ __html: article.content }} />
-                <button
-                  onClick={() =>
-                    navigate(`/see-article/${article.articleSerialId}`)
-                  }
-                >
-                  see Article
-                </button>
-              </div>
-            ))}
+          <div className="dropdown">
+            <label htmlFor="articles-dropdown">you are seeing:</label>
+            <select
+              className="articles-dropdown"
+              value={articlesValue}
+              onChange={(e) => setArticlesValue(e.target.value)}
+            >
+              <option value="published">published</option>
+              <option value="not-published">not published</option>
+            </select>
           </div>
+          {articlesValue === "published" && (
+            <div className="published-div">
+              <h2>published articles</h2>
+
+              {publishedArticles.map((article, index) => (
+                <div key={index}>
+                  <p>user: {article.user.username}</p>
+                  <p>title: {article.title}</p>
+                  <div dangerouslySetInnerHTML={{ __html: article.content }} />
+                  <button
+                    onClick={() =>
+                      navigate(`/see-article/${article.articleSerialId}`)
+                    }
+                  >
+                    see Article
+                  </button>
+                  <button>unpublish</button>
+                  <button
+                    onClick={(e) => deleteArticle(e, article.articleSerialId)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {articlesValue === "not-published" && (
+            <div className="not-published-div">
+              <h2>not published articles</h2>
+
+              {notPublishedArticles.map((article, index) => (
+                <div key={index}>
+                  <p>user: {article.user.username}</p>
+                  <p>title: {article.title}</p>
+                  <div dangerouslySetInnerHTML={{ __html: article.content }} />
+                  <button
+                    onClick={() =>
+                      navigate(`/see-article/${article.articleSerialId}`)
+                    }
+                  >
+                    see Article
+                  </button>
+
+                  <button>publish</button>
+                  <button
+                    onClick={(e) => deleteArticle(e, article.articleSerialId)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <h3>{message}</h3>
         </div>
       )}
     </>
