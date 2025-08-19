@@ -114,10 +114,46 @@ async function getAllPublishedArticles() {
   });
 }
 
-async function getAllUnPublishedArticles() {
+async function getAllUserPublishedArticles(username) {
+  const user = await prisma.user.findFirst({
+    where: {
+      username,
+    },
+  });
+
+  if (!user) throw new Error("user not found");
+
+  return await prisma.articles.findMany({
+    where: {
+      status: "published",
+      userId: user.id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    },
+  });
+}
+
+async function getAllUserUnPublishedArticles(username) {
+  const user = await prisma.user.findFirst({
+    where: {
+      username,
+    },
+  });
+
+  if (!user) throw new Error("user not found");
+
   return await prisma.articles.findMany({
     where: {
       status: "notPublished",
+      userId: user.id,
     },
     orderBy: {
       createdAt: "desc",
@@ -269,7 +305,8 @@ module.exports = {
   getOneArticle,
   createComment,
   getUserInfo,
-  getAllUnPublishedArticles,
+  getAllUserPublishedArticles,
+  getAllUserUnPublishedArticles,
   deleteArticle,
   publishArticle,
   unPublishArticle,

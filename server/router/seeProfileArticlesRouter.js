@@ -6,7 +6,7 @@ const {
   seeProfileArticlesController,
 } = require("../controller/seeProfileArticlesInfo");
 
-seeProfileArticleRouter.get("/", seeProfileArticlesController);
+seeProfileArticleRouter.get("/:username", seeProfileArticlesController);
 
 module.exports = {
   seeProfileArticleRouter,

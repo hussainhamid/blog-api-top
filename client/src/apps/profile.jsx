@@ -74,11 +74,12 @@ export default function Profile() {
       }
     };
 
+    fetchMe();
+
     if (activeTab === "articles") {
       getArticlesInfo();
     }
 
-    fetchMe();
     fetchUserProfile();
   }, [navigate, token, user, activeTab]);
 
@@ -86,9 +87,12 @@ export default function Profile() {
     localStorage.setItem("activeTab", "articles");
 
     try {
-      const res = await axios.get("http://localhost:3000/see-profile-article", {
-        withCredentials: true,
-      });
+      const res = await axios.get(
+        `http://localhost:3000/see-profile-article/${user}`,
+        {
+          withCredentials: true,
+        }
+      );
 
       if (res.data.success) {
         const publishedSanitizedArticles = res.data.publishedArticles.map(
@@ -110,6 +114,17 @@ export default function Profile() {
       }
     } catch (err) {
       console.error("error in getArticleInfo in profile.jsx", err);
+    }
+  };
+
+  const getCommentsInfo = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:3000/see-profile-comments/${user}`,
+        { withCredentials: true }
+      );
+    } catch (err) {
+      console.error("error in getCommentsInfo in Profile.jsx", err);
     }
   };
 
@@ -203,7 +218,15 @@ export default function Profile() {
         >
           articles
         </button>
-        <button onClick={() => setActiveTab("comments")}>comments</button>
+        <button
+          onClick={() => {
+            setActiveTab("comments");
+            localStorage.setItem("activeTab, comments");
+          }}
+        >
+          comments
+        </button>
+        <button onClick={() => navigate("/")}>homepage</button>
       </nav>
 
       {activeTab === "info" && (
@@ -211,7 +234,7 @@ export default function Profile() {
           <p>username: {userInformation?.username}</p>
           {userInformation.email && <p>email: {userInformation.email}</p>}
           <p>status: {userInformation.status}</p>
-          <p>articles: {userInformation.articlesNumber}</p>
+          <p>total articles: {userInformation.articlesNumber}</p>
           <p>comments: {userInformation.commentsNumber}</p>
         </div>
       )}
@@ -295,6 +318,12 @@ export default function Profile() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === "comments" && (
+        <div className="comments-div">
+          <h3>comments</h3>
         </div>
       )}
     </>

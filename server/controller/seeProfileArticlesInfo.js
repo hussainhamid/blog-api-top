@@ -1,9 +1,13 @@
 const db = require("../db/query");
 
 async function seeProfileArticlesController(req, res) {
-  const allPublishedArticles = await db.getAllPublishedArticles();
+  const { username } = req.params;
 
-  const allUnpublishedArticles = await db.getAllUnPublishedArticles();
+  const allPublishedArticles = await db.getAllUserPublishedArticles(username);
+
+  const allUnpublishedArticles = await db.getAllUserUnPublishedArticles(
+    username
+  );
 
   return res.json({
     publishedArticles: allPublishedArticles,
