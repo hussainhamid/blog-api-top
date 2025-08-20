@@ -11,6 +11,8 @@ export default function Profile() {
   const [publishedArticles, setPublishedArticles] = useState([]);
   const [notPublishedArticles, setNotPublishedArticles] = useState([]);
 
+  const [userComments, setUserComments] = useState([]);
+
   const [articlesValue, setArticlesValue] = useState("published");
 
   const [activeTab, setActiveTab] = useState(() => {
@@ -78,6 +80,8 @@ export default function Profile() {
 
     if (activeTab === "articles") {
       getArticlesInfo();
+    } else if (activeTab === "comments") {
+      getCommentsInfo();
     }
 
     fetchUserProfile();
@@ -114,17 +118,6 @@ export default function Profile() {
       }
     } catch (err) {
       console.error("error in getArticleInfo in profile.jsx", err);
-    }
-  };
-
-  const getCommentsInfo = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:3000/see-profile-comments/${user}`,
-        { withCredentials: true }
-      );
-    } catch (err) {
-      console.error("error in getCommentsInfo in Profile.jsx", err);
     }
   };
 
@@ -199,6 +192,43 @@ export default function Profile() {
     }
   };
 
+  const getCommentsInfo = async () => {
+    localStorage.setItem("activeTab", "comments");
+
+    try {
+      const res = await axios.get(
+        `http://localhost:3000/see-profile-comments/${user}`,
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        setUserComments(res.data.allComments);
+      }
+    } catch (err) {
+      console.error("error in getCommentsInfo in Profile.jsx", err);
+    }
+  };
+
+  const deleteComment = async (e, commentSerialId) => {
+    e.preventDefault();
+
+    try {
+      const res = await axios.delete(
+        `http://localhost:3000/delete-comment/${commentSerialId}`,
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        setMessage(res.data.message);
+        setUserComments((prev) =>
+          prev.filter((comment) => comment.commentSerialId !== commentSerialId)
+        );
+      }
+    } catch (err) {
+      console.error("error in deleteComment in profile.jsx", err);
+    }
+  };
+
   return (
     <>
       <nav>
@@ -221,7 +251,7 @@ export default function Profile() {
         <button
           onClick={() => {
             setActiveTab("comments");
-            localStorage.setItem("activeTab, comments");
+            localStorage.setItem("activeTab", "comments");
           }}
         >
           comments
@@ -324,6 +354,21 @@ export default function Profile() {
       {activeTab === "comments" && (
         <div className="comments-div">
           <h3>comments</h3>
+
+          {userComments.map((comment) => (
+            <div key={comment.id}>
+              <h4>{comment.user.username}: </h4>
+              <h4>{comment.comment}</h4>
+              <h4>{comment.commentSerialId}</h4>
+
+              <button
+                onClick={(e) => deleteComment(e, comment.commentSerialId)}
+              >
+                Delete
+              </button>
+              <button>See article</button>
+            </div>
+          ))}
         </div>
       )}
     </>

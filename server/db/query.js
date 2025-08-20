@@ -293,6 +293,40 @@ async function unPublishArticle(articleSerialId) {
   });
 }
 
+async function getAllUserComments(username) {
+  const user = await prisma.user.findFirst({
+    where: {
+      username,
+    },
+  });
+
+  if (!user) throw new Error("user not found");
+
+  return await prisma.comments.findMany({
+    where: {
+      userId: user.id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    },
+  });
+}
+
+async function deleteUserComment(commentSerialId) {
+  await prisma.comments.delete({
+    where: {
+      commentSerialId,
+    },
+  });
+}
+
 module.exports = {
   getComment,
   getUser,
@@ -310,4 +344,6 @@ module.exports = {
   deleteArticle,
   publishArticle,
   unPublishArticle,
+  getAllUserComments,
+  deleteUserComment,
 };
