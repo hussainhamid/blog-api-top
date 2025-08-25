@@ -27,6 +27,8 @@ export default function Profile() {
     status: "",
     commentsNumber: 0,
     articlesNumber: 0,
+    publishedArticlesNumber: 0,
+    notPublishedArticlesNumber: 0,
   });
 
   useEffect(() => {
@@ -54,38 +56,47 @@ export default function Profile() {
       }
     };
 
-    const fetchUserProfile = async () => {
-      try {
-        const res = await axios.post(
-          "http://localhost:3000/profile",
-          { username: user },
-          { withCredentials: true }
-        );
-
-        if (res.data.success && res.data.userInfo) {
-          setUserInfo({
-            username: res.data.userInfo.username,
-            email: res.data.userInfo.email,
-            status: res.data.userInfo.status,
-            commentsNumber: res.data.userInfo._count.Comments,
-            articlesNumber: res.data.userInfo._count.articles,
-          });
-        }
-      } catch (err) {
-        console.error("error in fetchUserProfile in profile.jsx", err);
-      }
-    };
-
     fetchMe();
+  }, [navigate, token]);
+
+  useEffect(() => {
+    if (!user) return;
 
     if (activeTab === "articles") {
       getArticlesInfo();
     } else if (activeTab === "comments") {
       getCommentsInfo();
+    } else if (activeTab === "info") {
+      fetchUserProfile();
     }
+  }, [user, activeTab]);
 
-    fetchUserProfile();
-  }, [navigate, token, user, activeTab]);
+  const fetchUserProfile = async () => {
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/profile",
+        { username: user },
+        { withCredentials: true }
+      );
+
+      if (res.data.success && res.data.userInfo) {
+        console.log(res.data.userInfo);
+
+        setUserInfo({
+          username: res.data.userInfo.username,
+          email: res.data.userInfo.email,
+          status: res.data.userInfo.status,
+          commentsNumber: res.data.userInfo._count.Comments,
+          articlesNumber: res.data.userInfo._count.articles,
+          publishedArticlesNumber: res.data.userInfo.publishedArticlesNumber,
+          notPublishedArticlesNumber:
+            res.data.userInfo.notPublishedArticlesNumber,
+        });
+      }
+    } catch (err) {
+      console.error("error in fetchUserProfile in profile.jsx", err);
+    }
+  };
 
   const getArticlesInfo = async () => {
     localStorage.setItem("activeTab", "articles");
@@ -265,6 +276,10 @@ export default function Profile() {
           {userInformation.email && <p>email: {userInformation.email}</p>}
           <p>status: {userInformation.status}</p>
           <p>total articles: {userInformation.articlesNumber}</p>
+          <p>published articles: {userInformation.publishedArticlesNumber}</p>
+          <p>
+            not published articles: {userInformation.notPublishedArticlesNumber}
+          </p>
           <p>comments: {userInformation.commentsNumber}</p>
         </div>
       )}

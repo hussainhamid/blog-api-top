@@ -222,7 +222,29 @@ async function createComment(articleSerialId, userId, comment) {
 }
 
 async function getUserInfo(username) {
-  return await prisma.user.findFirst({
+  const user = await prisma.user.findFirst({
+    where: {
+      username,
+    },
+  });
+
+  if (!user) throw new Error("user not found getUserInfo");
+
+  const publishedArticlesNumber = await prisma.articles.count({
+    where: {
+      userId: user.id,
+      status: "published",
+    },
+  });
+
+  const notPublishedArticlesNumber = await prisma.articles.count({
+    where: {
+      userId: user.id,
+      status: "notPublished",
+    },
+  });
+
+  const userInfo = await prisma.user.findFirst({
     where: {
       username,
     },
@@ -239,6 +261,12 @@ async function getUserInfo(username) {
       },
     },
   });
+
+  return {
+    ...userInfo,
+    publishedArticlesNumber,
+    notPublishedArticlesNumber,
+  };
 }
 
 async function deleteArticle(articleSerialId) {
