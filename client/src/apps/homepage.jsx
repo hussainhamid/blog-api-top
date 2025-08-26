@@ -3,8 +3,31 @@ import { useContext, useEffect, useState } from "react";
 import { shopContext } from "../App";
 import { useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
+import styled from "styled-components";
 
 export default function Homepage() {
+  const BodyDiv = styled.div`
+    display: flex;
+    flex-direction: column;
+  `;
+
+  const ArticleContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    flex-wrap: wrap;
+  `;
+
+  const ArticleDiv = styled.div`
+    width: 500px;
+    height: auto;
+    border: 1px solid grey;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin: 1rem;
+  `;
+
   const [writer, setWriter] = useState(false);
   const [message, setMessage] = useState("");
   const [articles, setArticles] = useState([]);
@@ -51,10 +74,19 @@ export default function Homepage() {
         });
 
         if (res.data.success) {
-          const sanitizedArticles = res.data.allArticles.map((article) => ({
-            ...article,
-            content: DOMPurify.sanitize(article.content),
-          }));
+          const sanitizedArticles = res.data.allArticles.map((article) => {
+            const content = DOMPurify.sanitize(article.content);
+            const title = article.title;
+
+            return {
+              ...article,
+              content,
+              preview:
+                content.length > 100 ? content.slice(0, 50) + "..." : content,
+              previewTitle:
+                title.length > 30 ? title.slice(0, 10) + "..." : title,
+            };
+          });
 
           setArticles(sanitizedArticles);
         }
@@ -104,38 +136,45 @@ export default function Homepage() {
 
   return (
     <>
-      <div>
-        <p>user: {user}</p>
-        {writer && (
-          <button onClick={() => navigate("/article")}>Create article</button>
-        )}
+      <BodyDiv>
+        <div>
+          <nav>
+            {writer && (
+              <button onClick={() => navigate("/article")}>
+                Create article
+              </button>
+            )}
 
-        <button onClick={() => navigate(`/profile/${user}`)}>Profile</button>
-        <button onClick={() => logOut()}>logOut</button>
-
-        {!writer && (
-          <button onClick={() => becomeWriter()}>Become Writer</button>
-        )}
-      </div>
-
-      <p>{message}</p>
-
-      <div>
-        {articles.map((article, index) => (
-          <div key={index}>
-            <p>user: {article.user.username}</p>
-            <p>title: {article.title}</p>
-            <div dangerouslySetInnerHTML={{ __html: article.content }} />
-            <button
-              onClick={() =>
-                navigate(`/see-article/${article.articleSerialId}`)
-              }
-            >
-              see Article
+            <button onClick={() => navigate(`/profile/${user}`)}>
+              Profile
             </button>
-          </div>
-        ))}
-      </div>
+            <button onClick={() => logOut()}>logOut</button>
+
+            {!writer && (
+              <button onClick={() => becomeWriter()}>Become Writer</button>
+            )}
+          </nav>
+        </div>
+
+        <p>{message}</p>
+
+        <ArticleContainer>
+          {articles.map((article, index) => (
+            <ArticleDiv key={index}>
+              <p>user: {article.user.username}</p>
+              <p>title: {article.previewTitle}</p>
+              <div dangerouslySetInnerHTML={{ __html: article.preview }} />
+              <button
+                onClick={() =>
+                  navigate(`/see-article/${article.articleSerialId}`)
+                }
+              >
+                see Article
+              </button>
+            </ArticleDiv>
+          ))}
+        </ArticleContainer>
+      </BodyDiv>
     </>
   );
 }
