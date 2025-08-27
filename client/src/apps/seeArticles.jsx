@@ -111,13 +111,14 @@ export default function SeeArticle() {
 
         <div>
           <label htmlFor="comment">Add comment:</label>
-          <input
+          <textarea
             type="text"
             id="comment"
             className="comment"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-          ></input>
+            maxLength={150}
+          ></textarea>
           <button onClick={(e) => addComment(e)}>Add Comment</button>
           <p>{message}</p>
         </div>

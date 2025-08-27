@@ -11,6 +11,12 @@ export default function Homepage() {
     flex-direction: column;
   `;
 
+  const Nav = styled.nav`
+    display: flex;
+    margin: auto;
+    gap: 20px;
+  `;
+
   const ArticleContainer = styled.div`
     display: flex;
     justify-content: center;
@@ -20,17 +26,43 @@ export default function Homepage() {
   `;
 
   const ArticleDiv = styled.div`
-    width: 500px;
+    width: auto;
     height: auto;
     border: 1px solid grey;
     border-radius: 1rem;
     padding: 1.5rem;
     margin: 1rem;
+
+    @media (max-width: 780px) {
+      width: 400px;
+    }
+  `;
+
+  const LoadingDiv = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    backdrop-filter: blur(10px);
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+
+  const LoadingInsideDiv = styled.div`
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   `;
 
   const [writer, setWriter] = useState(false);
   const [message, setMessage] = useState("");
   const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const { addToken, addUser, token, user } = useContext(shopContext);
 
@@ -89,6 +121,7 @@ export default function Homepage() {
           });
 
           setArticles(sanitizedArticles);
+          setLoading(false);
         }
       } catch (err) {
         console.error("error in fetchAticles in homepage.jsx", err);
@@ -137,24 +170,18 @@ export default function Homepage() {
   return (
     <>
       <BodyDiv>
-        <div>
-          <nav>
-            {writer && (
-              <button onClick={() => navigate("/article")}>
-                Create article
-              </button>
-            )}
+        <Nav>
+          {writer && (
+            <button onClick={() => navigate("/article")}>Create article</button>
+          )}
 
-            <button onClick={() => navigate(`/profile/${user}`)}>
-              Profile
-            </button>
-            <button onClick={() => logOut()}>logOut</button>
+          <button onClick={() => navigate(`/profile/${user}`)}>Profile</button>
+          <button onClick={() => logOut()}>logOut</button>
 
-            {!writer && (
-              <button onClick={() => becomeWriter()}>Become Writer</button>
-            )}
-          </nav>
-        </div>
+          {!writer && (
+            <button onClick={() => becomeWriter()}>Become Writer</button>
+          )}
+        </Nav>
 
         <p>{message}</p>
 
@@ -175,6 +202,14 @@ export default function Homepage() {
           ))}
         </ArticleContainer>
       </BodyDiv>
+
+      {loading && (
+        <LoadingDiv>
+          <LoadingInsideDiv>
+            <p>loading...</p>
+          </LoadingInsideDiv>
+        </LoadingDiv>
+      )}
     </>
   );
 }

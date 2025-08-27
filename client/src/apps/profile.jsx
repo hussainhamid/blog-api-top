@@ -2,11 +2,107 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
+import styled from "styled-components";
 
 export default function Profile() {
+  const BodyDiv = styled.div`
+    display: flex;
+    flex-direction: column;
+  `;
+
+  const Nav = styled.nav`
+    display: flex;
+    margin: auto;
+    gap: 20px;
+  `;
+
+  const ArticleContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    flex-wrap: wrap;
+  `;
+
+  const ArticleDiv = styled.div`
+    width: auto;
+    height: auto;
+    border: 1px solid grey;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin: 1rem;
+
+    @media (max-width: 780px) {
+      width: 400px;
+    }
+  `;
+
+  const CommentsContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    flex-wrap: wrap;
+  `;
+
+  const CommentDiv = styled.div`
+    width: 400px;
+    height: auto;
+    border: 1px solid grey;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin: 1rem;
+    display: flex;
+    flex-direction: column;
+
+    overflow-wrap: break-word;
+    white-space: normal;
+  `;
+
+  const InfoDiv = styled.div`
+    margin-top: 40px;
+    width: 60%;
+    margin: auto;
+    margin-top: 40px;
+  `;
+
+  const Fieldset = styled.fieldset`
+    border: 1px solid grey;
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: 1rem;
+
+    legend {
+      padding: 0 0.5rem;
+      font-weight: bold;
+    }
+  `;
+
+  const LoadingDiv = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    backdrop-filter: blur(10px);
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+
+  const LoadingInsideDiv = styled.div`
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+
   const navigate = useNavigate();
   const token = localStorage.getItem("jwtToken");
   const [user, setUser] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const [publishedArticles, setPublishedArticles] = useState([]);
   const [notPublishedArticles, setNotPublishedArticles] = useState([]);
@@ -63,10 +159,13 @@ export default function Profile() {
     if (!user) return;
 
     if (activeTab === "articles") {
+      setLoading(false);
       getArticlesInfo();
     } else if (activeTab === "comments") {
+      setLoading(false);
       getCommentsInfo();
     } else if (activeTab === "info") {
+      setLoading(false);
       fetchUserProfile();
     }
   }, [user, activeTab]);
@@ -110,18 +209,36 @@ export default function Profile() {
       );
 
       if (res.data.success) {
-        const publishedSanitizedArticles = res.data.publishedArticles.map(
-          (article) => ({
-            ...article,
-            content: DOMPurify.sanitize(article.content),
-          })
+        const unPublishedSanitizedArticles = res.data.unpublishedArticles.map(
+          (article) => {
+            const content = DOMPurify.sanitize(article.content);
+            const title = article.title;
+
+            return {
+              ...article,
+              content,
+              preview:
+                content.length > 100 ? content.slice(0, 50) + "..." : content,
+              previewTitle:
+                title.length > 30 ? title.slice(0, 10) + "..." : title,
+            };
+          }
         );
 
-        const unPublishedSanitizedArticles = res.data.unpublishedArticles.map(
-          (article) => ({
-            ...article,
-            content: DOMPurify.sanitize(article.content),
-          })
+        const publishedSanitizedArticles = res.data.publishedArticles.map(
+          (article) => {
+            const content = DOMPurify.sanitize(article.content);
+            const title = article.title;
+
+            return {
+              ...article,
+              content,
+              preview:
+                content.length > 100 ? content.slice(0, 50) + "..." : content,
+              previewTitle:
+                title.length > 30 ? title.slice(0, 10) + "..." : title,
+            };
+          }
         );
 
         setPublishedArticles(publishedSanitizedArticles);
@@ -242,149 +359,205 @@ export default function Profile() {
 
   return (
     <>
-      <nav>
-        <button
-          onClick={() => {
-            setActiveTab("info");
-            localStorage.setItem("activeTab", "info");
-          }}
-        >
-          info
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab("articles");
-            localStorage.setItem("activeTab", "articles");
-          }}
-        >
-          articles
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab("comments");
-            localStorage.setItem("activeTab", "comments");
-          }}
-        >
-          comments
-        </button>
-        <button onClick={() => navigate("/")}>homepage</button>
-      </nav>
+      <BodyDiv>
+        <Nav>
+          <button
+            onClick={() => {
+              setActiveTab("info");
+              localStorage.setItem("activeTab", "info");
+            }}
+          >
+            info
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab("articles");
+              localStorage.setItem("activeTab", "articles");
+            }}
+          >
+            articles
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab("comments");
+              localStorage.setItem("activeTab", "comments");
+            }}
+          >
+            comments
+          </button>
+          <button onClick={() => navigate("/")}>homepage</button>
+        </Nav>
 
-      {activeTab === "info" && (
-        <div>
-          <p>username: {userInformation?.username}</p>
-          {userInformation.email && <p>email: {userInformation.email}</p>}
-          <p>status: {userInformation.status}</p>
-          <p>total articles: {userInformation.articlesNumber}</p>
-          <p>published articles: {userInformation.publishedArticlesNumber}</p>
-          <p>
-            not published articles: {userInformation.notPublishedArticlesNumber}
-          </p>
-          <p>comments: {userInformation.commentsNumber}</p>
-        </div>
-      )}
+        {activeTab === "info" && (
+          <InfoDiv>
+            <Fieldset>
+              <legend>Name</legend>
+              <p>{userInformation?.username}</p>
+            </Fieldset>
+            {userInformation.email && (
+              <Fieldset>
+                <legend>Email</legend>
+                <p>{userInformation.email}</p>
+              </Fieldset>
+            )}
+            <Fieldset>
+              <legend>Status</legend>
+              <p>{userInformation.status}</p>
+            </Fieldset>
+            <Fieldset>
+              <p>{userInformation.articlesNumber}</p>
+            </Fieldset>
+            <Fieldset>
+              <legend>Published articles</legend>
+              <p>{userInformation.publishedArticlesNumber}</p>
+            </Fieldset>
+            <Fieldset>
+              <legend>Un-published articles</legend>
+              <p>{userInformation.notPublishedArticlesNumber}</p>
+            </Fieldset>
+            <Fieldset>
+              <legend>Total comments</legend>
+              <p>{userInformation.commentsNumber}</p>
+            </Fieldset>
+          </InfoDiv>
+        )}
 
-      {activeTab === "articles" && (
-        <div className="articles-div">
-          <h3>{message}</h3>
+        {activeTab === "articles" && (
+          <div className="articles-div">
+            <h3>{message}</h3>
 
-          <div className="dropdown">
-            <label htmlFor="articles-dropdown">you are seeing:</label>
-            <select
-              className="articles-dropdown"
-              value={articlesValue}
-              onChange={(e) => setArticlesValue(e.target.value)}
-            >
-              <option value="published">published</option>
-              <option value="not-published">not published</option>
-            </select>
-          </div>
-          {articlesValue === "published" && (
-            <div className="published-div">
-              <h2>published articles</h2>
-
-              {publishedArticles.map((article, index) => (
-                <div key={index}>
-                  <p>user: {article.user.username}</p>
-                  <p>title: {article.title}</p>
-                  <div dangerouslySetInnerHTML={{ __html: article.content }} />
-                  <button
-                    onClick={() =>
-                      navigate(`/see-article/${article.articleSerialId}`)
-                    }
-                  >
-                    see Article
-                  </button>
-                  <button
-                    onClick={(e) =>
-                      unPublishArticle(e, article.articleSerialId)
-                    }
-                  >
-                    unpublish
-                  </button>
-                  <button
-                    onClick={(e) => deleteArticle(e, article.articleSerialId)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {articlesValue === "not-published" && (
-            <div className="not-published-div">
-              <h2>un published articles</h2>
-
-              {notPublishedArticles.map((article, index) => (
-                <div key={index}>
-                  <p>user: {article.user.username}</p>
-                  <p>title: {article.title}</p>
-                  <div dangerouslySetInnerHTML={{ __html: article.content }} />
-                  <button
-                    onClick={() =>
-                      navigate(`/see-article/${article.articleSerialId}`)
-                    }
-                  >
-                    see Article
-                  </button>
-
-                  <button
-                    onClick={(e) => publishArticle(e, article.articleSerialId)}
-                  >
-                    publish
-                  </button>
-                  <button
-                    onClick={(e) => deleteArticle(e, article.articleSerialId)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {activeTab === "comments" && (
-        <div className="comments-div">
-          <h3>comments</h3>
-
-          {userComments.map((comment) => (
-            <div key={comment.id}>
-              <h4>{comment.user.username}: </h4>
-              <h4>{comment.comment}</h4>
-              <h4>{comment.commentSerialId}</h4>
-
-              <button
-                onClick={(e) => deleteComment(e, comment.commentSerialId)}
+            <div className="dropdown">
+              <label htmlFor="articles-dropdown">you are seeing:</label>
+              <select
+                className="articles-dropdown"
+                value={articlesValue}
+                onChange={(e) => setArticlesValue(e.target.value)}
               >
-                Delete
-              </button>
-              <button>See article</button>
+                <option value="published">published</option>
+                <option value="not-published">not published</option>
+              </select>
             </div>
-          ))}
-        </div>
+            {articlesValue === "published" && (
+              <div className="published-div">
+                <h2>published articles</h2>
+
+                <ArticleContainer>
+                  {publishedArticles.map((article, index) => (
+                    <ArticleDiv key={index}>
+                      <p>user: {article.user.username}</p>
+                      <p>title: {article.previewTitle}</p>
+                      <div
+                        dangerouslySetInnerHTML={{ __html: article.preview }}
+                      />
+                      <button
+                        onClick={() =>
+                          navigate(`/see-article/${article.articleSerialId}`)
+                        }
+                      >
+                        see Article
+                      </button>
+                      <button
+                        onClick={(e) =>
+                          unPublishArticle(e, article.articleSerialId)
+                        }
+                      >
+                        unpublish
+                      </button>
+                      <button
+                        onClick={(e) =>
+                          deleteArticle(e, article.articleSerialId)
+                        }
+                      >
+                        Delete
+                      </button>
+                    </ArticleDiv>
+                  ))}
+                </ArticleContainer>
+              </div>
+            )}
+
+            {articlesValue === "not-published" && (
+              <div className="not-published-div">
+                <h2>un published articles</h2>
+
+                <ArticleContainer>
+                  {notPublishedArticles.map((article, index) => (
+                    <ArticleDiv key={index}>
+                      <p>user: {article.user.username}</p>
+                      <p>title: {article.previewTitle}</p>
+                      <div
+                        dangerouslySetInnerHTML={{ __html: article.preview }}
+                      />
+                      <button
+                        onClick={() =>
+                          navigate(`/see-article/${article.articleSerialId}`)
+                        }
+                      >
+                        see Article
+                      </button>
+
+                      <button
+                        onClick={(e) =>
+                          publishArticle(e, article.articleSerialId)
+                        }
+                      >
+                        publish
+                      </button>
+                      <button
+                        onClick={(e) =>
+                          deleteArticle(e, article.articleSerialId)
+                        }
+                      >
+                        Delete
+                      </button>
+                    </ArticleDiv>
+                  ))}
+                </ArticleContainer>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "comments" && (
+          <div className="comments-div">
+            <h3>comments</h3>
+
+            <CommentsContainer>
+              {userComments.map((comment) => (
+                <CommentDiv key={comment.id}>
+                  <div>
+                    <h4>{comment.user.username}: </h4>
+                  </div>
+                  <div>
+                    <h4>{comment.comment}</h4>
+                  </div>
+                  <div>
+                    <button
+                      onClick={(e) => deleteComment(e, comment.commentSerialId)}
+                    >
+                      Delete
+                    </button>
+                    <button
+                      onClick={() =>
+                        navigate(`/see-article/${comment.articleId}`)
+                      }
+                    >
+                      See article
+                    </button>
+                  </div>
+                </CommentDiv>
+              ))}
+            </CommentsContainer>
+          </div>
+        )}
+      </BodyDiv>
+
+      {loading && (
+        <LoadingDiv>
+          <LoadingInsideDiv>
+            <p>loading...</p>
+          </LoadingInsideDiv>
+        </LoadingDiv>
       )}
     </>
   );
