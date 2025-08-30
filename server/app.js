@@ -138,6 +138,6 @@ app.use((err, req, res, next) => {
   console.error(`error: ${err.message}`);
 });
 
-app.listen("3000", () => {
-  console.log("server running on port 3000");
+app.listen(process.env.PORT, () => {
+  console.log(`server running on port ${process.env.PORT}`);
 });
