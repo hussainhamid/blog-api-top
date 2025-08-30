@@ -5,7 +5,7 @@ async function articleFormPost(req, res) {
 
   await db.createArticle(title, content, username);
 
-  res.json({ success: true, message: "article created in db" });
+  res.json({ success: true, message: "Article published" });
 }
 
 async function articleSavePost(req, res) {
@@ -13,7 +13,7 @@ async function articleSavePost(req, res) {
 
   await db.saveArticle(title, content, username);
 
-  res.json({ success: true, message: "saved article" });
+  res.json({ success: true, message: "Article saved" });
 }
 
 module.exports = {

@@ -132,7 +132,7 @@ export default function Profile() {
       if (token) {
         try {
           const res = await axios.get(
-            "http://localhost:3000/me",
+            "/me",
             {
               headers: {
                 Authorization: `bearer ${token}`,
@@ -143,6 +143,7 @@ export default function Profile() {
 
           if (res.data.success) {
             setUser(res.data.user.username);
+            setLoading(false);
           }
         } catch (err) {
           console.log("error in if statement homepage.jsx", err);
@@ -158,29 +159,29 @@ export default function Profile() {
   useEffect(() => {
     if (!user) return;
 
-    if (activeTab === "articles") {
-      setLoading(false);
-      getArticlesInfo();
-    } else if (activeTab === "comments") {
-      setLoading(false);
-      getCommentsInfo();
-    } else if (activeTab === "info") {
-      setLoading(false);
-      fetchUserProfile();
-    }
+    const fetchData = async () => {
+      if (activeTab === "articles") {
+        await getArticlesInfo();
+      } else if (activeTab === "comments") {
+        await getCommentsInfo();
+      } else if (activeTab === "info") {
+        await fetchUserProfile();
+      }
+    };
+
+    fetchData();
   }, [user, activeTab]);
 
   const fetchUserProfile = async () => {
     try {
+      setLoading(true);
       const res = await axios.post(
-        "http://localhost:3000/profile",
+        "/profile",
         { username: user },
         { withCredentials: true }
       );
 
       if (res.data.success && res.data.userInfo) {
-        console.log(res.data.userInfo);
-
         setUserInfo({
           username: res.data.userInfo.username,
           email: res.data.userInfo.email,
@@ -191,6 +192,7 @@ export default function Profile() {
           notPublishedArticlesNumber:
             res.data.userInfo.notPublishedArticlesNumber,
         });
+        setLoading(false);
       }
     } catch (err) {
       console.error("error in fetchUserProfile in profile.jsx", err);
@@ -201,12 +203,10 @@ export default function Profile() {
     localStorage.setItem("activeTab", "articles");
 
     try {
-      const res = await axios.get(
-        `http://localhost:3000/see-profile-article/${user}`,
-        {
-          withCredentials: true,
-        }
-      );
+      setLoading(true);
+      const res = await axios.get(`/see-profile-article/${user}`, {
+        withCredentials: true,
+      });
 
       if (res.data.success) {
         const unPublishedSanitizedArticles = res.data.unpublishedArticles.map(
@@ -243,6 +243,8 @@ export default function Profile() {
 
         setPublishedArticles(publishedSanitizedArticles);
         setNotPublishedArticles(unPublishedSanitizedArticles);
+
+        setLoading(false);
       }
     } catch (err) {
       console.error("error in getArticleInfo in profile.jsx", err);
@@ -253,12 +255,10 @@ export default function Profile() {
     e.preventDefault();
 
     try {
-      const res = await axios.delete(
-        `http://localhost:3000/delete-article/${articleSerialId}`,
-        {
-          withCredentials: true,
-        }
-      );
+      setLoading(true);
+      const res = await axios.delete(`/delete-article/${articleSerialId}`, {
+        withCredentials: true,
+      });
 
       if (res.data.success) {
         setMessage(res.data.message);
@@ -270,6 +270,8 @@ export default function Profile() {
         setNotPublishedArticles((prev) =>
           prev.filter((article) => article.articleSerialId !== articleSerialId)
         );
+
+        setLoading(false);
       }
     } catch (err) {
       console.error("error in deleteArticle in profile.jsx", err);
@@ -280,12 +282,10 @@ export default function Profile() {
     e.preventDefault();
 
     try {
-      const res = await axios.put(
-        `http://localhost:3000/publish-article/${articleSerialId}`,
-        {
-          withCredentials: true,
-        }
-      );
+      setLoading(true);
+      const res = await axios.put(`/publish-article/${articleSerialId}`, {
+        withCredentials: true,
+      });
 
       if (res.data.success) {
         setMessage(res.data.message);
@@ -293,6 +293,8 @@ export default function Profile() {
         setNotPublishedArticles((prev) =>
           prev.filter((article) => article.articleSerialId !== articleSerialId)
         );
+
+        setLoading(false);
       }
     } catch (err) {
       console.error("error in publishArticle in Profile.jsx", err);
@@ -303,10 +305,10 @@ export default function Profile() {
     e.preventDefault();
 
     try {
-      const res = await axios.put(
-        `http://localhost:3000/unPublish-article/${articleSerialId}`,
-        { withCredentials: true }
-      );
+      setLoading(true);
+      const res = await axios.put(`/unPublish-article/${articleSerialId}`, {
+        withCredentials: true,
+      });
 
       if (res.data.success) {
         setMessage(res.data.message);
@@ -314,6 +316,7 @@ export default function Profile() {
         setPublishedArticles((prev) =>
           prev.filter((article) => article.articleSerialId !== articleSerialId)
         );
+        setLoading(false);
       }
     } catch (err) {
       console.error("error in unPublishArticle in profile.jsx", err);
@@ -324,13 +327,26 @@ export default function Profile() {
     localStorage.setItem("activeTab", "comments");
 
     try {
-      const res = await axios.get(
-        `http://localhost:3000/see-profile-comments/${user}`,
-        { withCredentials: true }
-      );
+      setLoading(true);
+      const res = await axios.get(`/see-profile-comments/${user}`, {
+        withCredentials: true,
+      });
 
       if (res.data.success) {
-        setUserComments(res.data.allComments);
+        const comments = res.data.allComments.map((comment) => {
+          const content = comment.comment;
+          const username = comment.user.username;
+
+          return {
+            content,
+            username,
+            previewComment:
+              content.length > 20 ? content.slice(0, 50) + "...." : content,
+          };
+        });
+
+        setUserComments(comments);
+        setLoading(false);
       }
     } catch (err) {
       console.error("error in getCommentsInfo in Profile.jsx", err);
@@ -341,16 +357,18 @@ export default function Profile() {
     e.preventDefault();
 
     try {
-      const res = await axios.delete(
-        `http://localhost:3000/delete-comment/${commentSerialId}`,
-        { withCredentials: true }
-      );
+      setLoading(true);
+      const res = await axios.delete(`/delete-comment/${commentSerialId}`, {
+        withCredentials: true,
+      });
 
       if (res.data.success) {
         setMessage(res.data.message);
         setUserComments((prev) =>
           prev.filter((comment) => comment.commentSerialId !== commentSerialId)
         );
+
+        setLoading(false);
       }
     } catch (err) {
       console.error("error in deleteComment in profile.jsx", err);
@@ -385,7 +403,9 @@ export default function Profile() {
           >
             comments
           </button>
-          <button onClick={() => navigate("/")}>homepage</button>
+          <button onClick={() => navigate(`/${userInformation.username}`)}>
+            homepage
+          </button>
         </Nav>
 
         {activeTab === "info" && (
@@ -405,6 +425,7 @@ export default function Profile() {
               <p>{userInformation.status}</p>
             </Fieldset>
             <Fieldset>
+              <legend>Total articles</legend>
               <p>{userInformation.articlesNumber}</p>
             </Fieldset>
             <Fieldset>
@@ -526,10 +547,10 @@ export default function Profile() {
               {userComments.map((comment) => (
                 <CommentDiv key={comment.id}>
                   <div>
-                    <h4>{comment.user.username}: </h4>
+                    <h4>{comment.username}: </h4>
                   </div>
                   <div>
-                    <h4>{comment.comment}</h4>
+                    <h5>{comment.previewComment}</h5>
                   </div>
                   <div>
                     <button

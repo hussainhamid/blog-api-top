@@ -2,6 +2,71 @@ import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { shopContext } from "../App";
+import styled from "styled-components";
+
+const BodyDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const FormDiv = styled.div`
+  margin-top: 200px;
+  display: flex;
+  flex-direction: column;
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border: 1px solid grey;
+  border-radius: 20px;
+  padding: 20px;
+  margin: auto;
+  text-align: left;
+`;
+
+const InputDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+const Input = styled.input`
+  background-color: #242424;
+  border: none;
+  border-bottom: 1px solid grey;
+`;
+
+const BtnDiv = styled.div`
+  display: flex;
+  gap: 20px;
+`;
+
+const WriterDiv = styled.div`
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+
+  &:hover {
+    border-color: #646cff;
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+  }
+`;
+
+const WriterInput = styled.input`
+  margin-right: 10px;
+`;
 
 export default function Signup() {
   const [data, setData] = useState({
@@ -23,7 +88,7 @@ export default function Signup() {
       if (token) {
         try {
           const res = await axios.get(
-            "http://localhost:3000/me",
+            "/me",
             {
               headers: {
                 Authorization: `bearer ${token}`,
@@ -56,7 +121,7 @@ export default function Signup() {
 
     try {
       const res = await axios.post(
-        "http://localhost:3000/sign-up",
+        "/sign-up",
         {
           username: data.userName,
           password: data.password,
@@ -80,45 +145,47 @@ export default function Signup() {
 
   return (
     <>
-      <div>
-        <form>
-          <div>
-            <label htmlFor="username">username</label>
-            <input
-              type="text"
-              className="username"
-              value={data.userName}
-              onChange={(e) => setData({ ...data, userName: e.target.value })}
-            ></input>
-          </div>
+      <BodyDiv>
+        <FormDiv>
+          <Form>
+            <InputDiv>
+              <label htmlFor="username">username</label>
+              <Input
+                type="text"
+                className="username"
+                value={data.userName}
+                onChange={(e) => setData({ ...data, userName: e.target.value })}
+              ></Input>
+            </InputDiv>
 
-          <div>
-            <label htmlFor="password">password</label>
-            <input
-              type="password"
-              className="password"
-              value={data.password}
-              onChange={(e) => setData({ ...data, password: e.target.value })}
-            ></input>
-          </div>
+            <InputDiv>
+              <label htmlFor="password">password</label>
+              <Input
+                type="password"
+                className="password"
+                value={data.password}
+                onChange={(e) => setData({ ...data, password: e.target.value })}
+              ></Input>
+            </InputDiv>
 
-          <div>
-            <label htmlFor="writer">Become a writer</label>
-            <input
-              type="checkbox"
-              className="writer"
-              checked={writer}
-              onChange={(e) => setWriter(e.target.checked)}
-            ></input>
-          </div>
+            <WriterDiv>
+              <WriterInput
+                type="checkbox"
+                className="writer"
+                checked={writer}
+                onChange={(e) => setWriter(e.target.checked)}
+              ></WriterInput>
+              <label htmlFor="writer">Become a writer</label>
+            </WriterDiv>
 
-          <div>
-            <button onClick={(e) => signupFunc(e)}>Create account</button>
-            <button onClick={() => navigate("/log-in")}>log in</button>
-          </div>
-        </form>
+            <BtnDiv>
+              <button onClick={(e) => signupFunc(e)}>Create account</button>
+              <button onClick={() => navigate("/log-in")}>log in</button>
+            </BtnDiv>
+          </Form>
+        </FormDiv>
         <h2>{message}</h2>
-      </div>
+      </BodyDiv>
     </>
   );
 }

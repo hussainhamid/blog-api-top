@@ -72,8 +72,9 @@ export default function Homepage() {
     const fetchMe = async () => {
       if (token) {
         try {
+          setLoading(true);
           const res = await axios.get(
-            "http://localhost:3000/me",
+            "/me",
             {
               headers: {
                 Authorization: `bearer ${token}`,
@@ -84,6 +85,7 @@ export default function Homepage() {
 
           if (res.data.success) {
             addUser(res.data.user.username);
+            setLoading(false);
           } else {
             navigate("/log-in");
           }
@@ -101,7 +103,7 @@ export default function Homepage() {
 
     const fetchArticles = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/get-articles", {
+        const res = await axios.get("/get-articles", {
           withCredentials: true,
         });
 
@@ -134,7 +136,7 @@ export default function Homepage() {
 
   const logOut = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/log-out", {
+      const res = await axios.get("/log-out", {
         withCredentials: true,
       });
 
@@ -152,7 +154,7 @@ export default function Homepage() {
   const becomeWriter = async () => {
     try {
       const res = await axios.put(
-        "http://localhost:3000/become-writer",
+        "/become-writer",
         { username: user },
         { withCredentials: true }
       );

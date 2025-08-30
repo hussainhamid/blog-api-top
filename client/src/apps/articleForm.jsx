@@ -86,7 +86,7 @@ export default function CreateArticle() {
       if (token) {
         try {
           const res = await axios.get(
-            "http://localhost:3000/me",
+            "/me",
             {
               headers: {
                 Authorization: `bearer ${token}`,
@@ -119,7 +119,8 @@ export default function CreateArticle() {
     const content = editorRef.current.getContent();
 
     try {
-      const res = await axios.post("http://localhost:3000/article", {
+      setLoading(true);
+      const res = await axios.post("/article", {
         title: title,
         content: content,
         username: user,
@@ -128,6 +129,7 @@ export default function CreateArticle() {
       if (res.data.success) {
         console.log("recieved and stored the data");
         setMessage(res.data.message);
+        setLoading(false);
       }
     } catch (err) {
       console.log("error in handleSubmit", err);
@@ -140,8 +142,9 @@ export default function CreateArticle() {
     const content = editorRef.current.getContent();
 
     try {
+      setLoading(true);
       const res = await axios.post(
-        "http://localhost:3000/save-article",
+        "/save-article",
         {
           title: title,
           content: content,
@@ -152,6 +155,7 @@ export default function CreateArticle() {
 
       if (res.data.success) {
         setMessage(res.data.message);
+        setLoading(false);
       }
     } catch (err) {
       console.error("error in handleSave func in articleForm.jsx", err);

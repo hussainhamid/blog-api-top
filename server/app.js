@@ -4,6 +4,8 @@ const app = express();
 const cors = require("cors");
 require("./config/passport");
 
+const path = require("path");
+
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
@@ -83,6 +85,8 @@ function verifyToken(req, res, next) {
   }
 }
 
+app.use(express.static(path.join(__dirname, "../client/dist")));
+
 app.use("/log-in", loginRouter);
 app.use("/sign-up", signupRouter);
 app.use("/log-out", logoutRouter);
@@ -112,12 +116,10 @@ app.get("/me", verifyToken, async (req, res) => {
       });
 
       if (!user) {
-        return res
-          .sendStatus(404)
-          .json({ success: false, message: "user not found" });
+        return res.json({ success: false, message: "user not found" });
       }
 
-      res.json({
+      return res.json({
         success: true,
         user,
       });
@@ -126,6 +128,14 @@ app.get("/me", verifyToken, async (req, res) => {
       res.sendStatus(500).json({ success: false, message: "server error" });
     }
   });
+});
+
+app.get("/*any", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+});
+
+app.use((err, req, res, next) => {
+  console.error(`error: ${err.message}`);
 });
 
 app.listen("3000", () => {

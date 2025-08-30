@@ -26,7 +26,7 @@ export default function SeeArticle() {
       if (token) {
         try {
           const res = await axios.get(
-            "http://localhost:3000/me",
+            "/me",
             {
               headers: {
                 Authorization: `bearer ${token}`,
@@ -49,7 +49,7 @@ export default function SeeArticle() {
     const fetchArticle = async () => {
       try {
         const res = await axios.post(
-          `http://localhost:3000/see-article/${articleSerialId}`,
+          `/see-article/${articleSerialId}`,
           { articleSerialId },
           { withCredentials: true }
         );
@@ -81,7 +81,7 @@ export default function SeeArticle() {
 
     try {
       const res = await axios.post(
-        "http://localhost:3000/create-comment",
+        "/create-comment",
         {
           articleSerialId,
           userId,
@@ -117,7 +117,7 @@ export default function SeeArticle() {
             className="comment"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            maxLength={150}
+            maxLength={50}
           ></textarea>
           <button onClick={(e) => addComment(e)}>Add Comment</button>
           <p>{message}</p>
