@@ -97,13 +97,14 @@ export default function LogIn() {
 
           if (res.data.success) {
             addUser(res.data.user.username);
-            navigate(`/${res.data.user.username}`);
-          }
 
-          if (res.data.user.status === "reader") {
-            addWriter(false);
-          } else if (res.data.user.status === "writer") {
-            addWriter(true);
+            if (res.data.user.status === "reader") {
+              addWriter(false);
+            } else if (res.data.user.status === "writer") {
+              addWriter(true);
+            }
+
+            navigate(`/${res.data.user.username}`);
           }
         } catch (err) {
           console.log("error in if statement homepage.jsx", err);

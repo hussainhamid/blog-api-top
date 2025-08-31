@@ -97,10 +97,10 @@ export default function CreateArticle() {
 
           if (res.data.success) {
             setuser(res.data.user.username);
-          }
 
-          if (res.data.user.status === "reader") {
-            navigate("/");
+            if (res.data.user.status === "reader") {
+              navigate("/");
+            }
           }
         } catch (err) {
           console.log("error in if statement homepage.jsx", err);

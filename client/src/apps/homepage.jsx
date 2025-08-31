@@ -85,15 +85,16 @@ export default function Homepage() {
 
           if (res.data.success) {
             addUser(res.data.user.username);
+
+            if (res.data.user.status === "reader") {
+              setWriter(false);
+            } else if (res.data.user.status === "writer") {
+              setWriter(true);
+            }
+
             setLoading(false);
           } else {
             navigate("/log-in");
-          }
-
-          if (res.data.user.status === "reader") {
-            setWriter(false);
-          } else if (res.data.user.status === "writer") {
-            setWriter(true);
           }
         } catch (err) {
           console.log("error in if statement homepage.jsx", err);
