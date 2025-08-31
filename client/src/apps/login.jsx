@@ -89,7 +89,7 @@ export default function LogIn() {
             "/me",
             {
               headers: {
-                Authorization: `bearer ${token}`,
+                Authorization: `Bearer ${token}`,
               },
             },
             { withCredentials: true }
@@ -153,6 +153,7 @@ export default function LogIn() {
         );
 
         if (res.data.success) {
+          console.log(res.data.user);
           localStorage.setItem("jwtToken", res.data.token);
           addToken(res.data.token);
           addUser(res.data.user.username);

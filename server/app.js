@@ -4,7 +4,7 @@ const app = express();
 const cors = require("cors");
 require("./config/passport");
 
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 3000;
 require("dotenv").config;
 
 const path = require("path");
@@ -86,10 +86,6 @@ function verifyToken(req, res, next) {
 
 app.use(express.static(path.join(__dirname, "../client/dist")));
 
-app.get("/*any", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
-});
-
 app.use("/log-in", loginRouter);
 app.use("/sign-up", signupRouter);
 app.use("/log-out", logoutRouter);
@@ -131,6 +127,10 @@ app.get("/me", verifyToken, async (req, res) => {
       res.sendStatus(500).json({ success: false, message: "server error" });
     }
   });
+});
+
+app.get("/*any", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
 });
 
 app.use((err, req, res, next) => {
