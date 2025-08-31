@@ -4,6 +4,9 @@ const app = express();
 const cors = require("cors");
 require("./config/passport");
 
+const port = process.env.PORT || 4000;
+require("dotenv").config;
+
 const path = require("path");
 
 const { PrismaClient } = require("@prisma/client");
@@ -44,10 +47,6 @@ const { deleteUserCommentRouter } = require("./router/deleteUserComment");
 
 const passport = require("passport");
 
-app.get("/", async (req, res) => {
-  res.send("hello world");
-});
-
 app.get(
   "/protected",
   passport.authenticate("jwt", { session: false }),
@@ -86,6 +85,10 @@ function verifyToken(req, res, next) {
 }
 
 app.use(express.static(path.join(__dirname, "../client/dist")));
+
+app.get("/*any", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+});
 
 app.use("/log-in", loginRouter);
 app.use("/sign-up", signupRouter);
@@ -130,14 +133,10 @@ app.get("/me", verifyToken, async (req, res) => {
   });
 });
 
-app.get("/*any", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
-});
-
 app.use((err, req, res, next) => {
   console.error(`error: ${err.message}`);
 });
 
-app.listen(process.env.PORT || "3000", () => {
-  console.log(`server running on port ${process.env.PORT}`);
+app.listen(port, () => {
+  console.log(`server running on port ${port}`);
 });
