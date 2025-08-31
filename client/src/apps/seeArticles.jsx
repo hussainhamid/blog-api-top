@@ -2,6 +2,23 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import DOMPurify from "dompurify";
+import styled from "styled-components";
+
+const CommentDiv = styled.div`
+  border: 1px solid grey;
+  border-radius: 1rem;
+  padding: 0.2rem;
+  padding-top: 1rem;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  width: 10%;
+
+  @media (max-width: 780px) {
+    width: 100%;
+    padding: 0.5rem;
+  }
+`;
 
 export default function SeeArticle() {
   const navigate = useNavigate();
@@ -126,10 +143,10 @@ export default function SeeArticle() {
         <h3>Comments:</h3>
         {comments.length === 0 && <p>No comments yet.</p>}
         {comments.map((c, index) => (
-          <div key={index} style={{ marginBottom: "1rem" }}>
+          <CommentDiv key={index} style={{ marginBottom: "1rem" }}>
             <strong>{c.user.username}:</strong>
             <p>{c.comment}</p>
-          </div>
+          </CommentDiv>
         ))}
       </div>
     </>
